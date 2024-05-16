@@ -41,7 +41,6 @@ Nach dem Prinzip der Clean Architecture ist das Projekt in folgende Module unter
 - OpenAI TTS-1-HD API
 - Mikrofon und Audioausgabe-Gerät
 - SoX (Sound eXchange)
-- `node-record-lpcm16`
 
 ## Installation
 
@@ -72,7 +71,6 @@ Erstellen Sie eine `.env` Datei im Stammverzeichnis und fügen Sie die erforderl
 ```
 OPENAI_API_KEY=<Ihr OpenAI API Schlüssel>
 OPENAI_API_ORG=<Ihre OpenAI Organisation>
-AUDIODRIVER=waveaudio
 ```
 
 ### Ausführen des Tools

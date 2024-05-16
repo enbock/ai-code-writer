@@ -2,8 +2,6 @@ import assert from 'assert';
 import {ChildProcessWithoutNullStreams, spawn, SpawnOptions} from 'child_process';
 import {Readable} from 'node:stream';
 
-const debug = require('debug')('record');
-
 export interface Options {
     bitRate: number;
     sampleRate: number;       // audio sample rate
@@ -13,9 +11,10 @@ export interface Options {
     thresholdStart?: number | null;  // silence threshold to start recording, overrides threshold (rec only)
     thresholdEnd?: number | null;    // silence threshold to end recording, overrides threshold (rec only)
     silence: string;          // seconds of silence before ending
-    audioType: string;        // audio type to record
+    audioType: string;        // audio type to record,
 }
 
+const debug = (...args: Array<any>) => console.log('Debug:', ...args);
 
 export class Recording {
     private readonly options: Options;
