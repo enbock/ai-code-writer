@@ -1,18 +1,20 @@
-import AudioRecorder from '../../Core/AudioRecorder';
+import AudioRecorder from '../../../Core/AudioRecorder';
 import {PassThrough} from 'stream';
-import {record, RecorderStream} from 'node-record-lpcm16';
+import {Recording, SoxRecordingFactory} from './SoxConnector/Recording';
 
 class RecordingHandler {
     private chunks: Buffer[] = [];
     private isStopped: boolean = false;
     private passThrough: PassThrough = new PassThrough();
+    private timeoutId?: NodeJS.Timeout;
 
     constructor(
-        private recordingStream: RecorderStream,
+        private recordingStream: Recording,
         private resolve: (value: Buffer | PromiseLike<Buffer>) => void,
         private reject: (reason?: any) => void
     ) {
         this.registerEvents();
+        this.resetTimeout();
     }
 
     private registerEvents(): void {
@@ -23,12 +25,18 @@ class RecordingHandler {
         const stream = this.recordingStream.stream();
         stream.on('error', this.onError.bind(this));
         stream.pipe(this.passThrough);
+    }
 
-        setTimeout(() => this.stopRecording(stream), 5000);
+    private resetTimeout(): void {
+        if (this.timeoutId) {
+            clearTimeout(this.timeoutId);
+        }
+        this.timeoutId = setTimeout(() => this.stopRecording(), 5000);
     }
 
     private onData(chunk: Buffer): void {
         this.chunks.push(chunk);
+        this.resetTimeout();
     }
 
     private onEnd(): void {
@@ -45,30 +53,32 @@ class RecordingHandler {
         }
     }
 
-    private stopRecording(stream: NodeJS.ReadableStream): void {
+    private stopRecording(): void {
         if (!this.isStopped) {
-            stream.unpipe(this.passThrough);
+            this.recordingStream.stream().unpipe(this.passThrough);
             this.recordingStream.stop();
             this.isStopped = true;
-            this.resolve(Buffer.concat(this.chunks));
+            this.resolve(Buffer.concat(this.chunks)); // Sicherstellen, dass der Buffer immer zurückgegeben wird
         }
     }
 }
 
 export default class NodeAudioRecorder implements AudioRecorder {
     constructor(
-        private recordLpcm16: typeof record
+        private soxFactory: typeof SoxRecordingFactory
     ) {
     }
 
     public async startRecording(): Promise<Buffer> {
         return new Promise<Buffer>((resolve, reject): void => {
-            const recordingStream: RecorderStream = this.recordLpcm16({
-                sampleRateHertz: 16000,
-                threshold: 0.5,
-                verbose: true,
-                silence: '10.0',
-                recordProgram: 'sox'
+            const recordingStream: Recording = this.soxFactory({
+                sampleRate: 16000,
+                channels: 1,
+                threshold: 1.1,
+                silence: '1.5',
+                endOnSilence: true,
+                audioType: 'wav',
+                bitRate: 16
             });
 
             new RecordingHandler(recordingStream, resolve, reject);

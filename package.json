@@ -9,9 +9,8 @@
     "dev": "ts-node-dev src/index.ts"
   },
   "dependencies": {
-    "openai": "*",
     "dotenv": "*",
-    "node-record-lpcm16": "*"
+    "openai": "*"
   },
   "devDependencies": {
     "@types/node": "*",
