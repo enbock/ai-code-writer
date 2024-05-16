@@ -1,0 +1,20 @@
+{
+  "name": "ai-code-writer",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --build",
+    "start": "tsc && node build/index.js",
+    "dev": "ts-node-dev src/index.ts"
+  },
+  "dependencies": {
+    "openai": "*",
+    "dotenv": "*",
+    "node-record-lpcm16": "*"
+  },
+  "devDependencies": {
+    "@types/node": "*",
+    "typescript": "^5"
+  }
+}
