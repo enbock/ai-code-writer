@@ -2,96 +2,87 @@
 
 ## Übersicht
 
-**AI Code Writer** ist ein Command-Line-Tool, das Sprachaufnahmen per Mikrofon aufnimmt, diese mittels der OpenAI
-Whisper-API transkribiert und den Text an die OpenAI GPT-4 API sendet. Die erhaltene Antwort wird anschließend mit
-OpenAI TTS-1-HD in eine Audiodatei umgewandelt und wiedergegeben.
+Dies ist ein AI-basierter Code Writer, der Audio-Input empfängt, in Text umwandelt und basierend auf der Transkription
+eine Konversation mit der OpenAI GPT-API führt. Anschließend wird die Antwort wieder in Audio umgewandelt und
+abgespielt.
 
-## Features
+## Voraussetzungen
 
-- Sprachaufnahmen vom Mikrofon
-- Transkription mittels OpenAI Whisper-API
-- Kommunikation mit der OpenAI GPT-4 API
-- Audioausgabe der Antwort mittels OpenAI TTS-1-HD
-- Konfigurierbare Umgebungsvariablen (API-Keys)
+- Node.js (>= 20)
+- Sox (falls nicht vorhanden: https://sox.sourceforge.net)
 
-## Projektstruktur
+## Installation von SoX, Node.js und npm
 
-Nach dem Prinzip der Clean Architecture ist das Projekt in folgende Module unterteilt:
-
-- **Application**: Hier befinden sich alle Funktionen, die als Ein- oder Ausgabe mit dem Benutzer dienen.
-- **Core**: Enthält UseCases, Services und sonstige Business-Logiken sowie Interfaces (
-  z.B. `ChatCompletionClient`, `AudioTransformClient`). Auch die Datenmodelle (Entities) liegen in diesem Modul.
-- **Infrastructure**: Beinhaltet die Implementierungen der Clients, Encoder und Parser, um fremde Bibliotheken und SDKs
-  anzubinden.
-
-## Implementierungsansatz
-
-- Klassenprinzip
-- Funktionen werden in Langform geschrieben, sobald der Code-Block über 100 Zeichen hinausgeht.
-- Inverse Dependency Injection mithilfe eines Containers, der als Singleton-Factory fungiert.
-- Konfiguration (z.B. API_KEYS) erfolgt über Umgebungsvariablen.
-- Alle Klassen und Interfaces werden standardmäßig exportiert.
-
-## Abhängigkeiten
-
-- Node.js
-- Typescript
-- OpenAI Whisper-API
-- OpenAI GPT-4 API
-- OpenAI TTS-1-HD API
-- Mikrofon und Audioausgabe-Gerät
-- SoX (Sound eXchange)
-
-## Installation
-
-### Installation von SoX (Sound eXchange)
-
-**Windows:**
-
-1. Laden Sie SoX von der offiziellen [SoX-Seite](http://sox.sourceforge.net/) herunter und installieren Sie es.
-2. Fügen Sie das SoX Installationsverzeichnis zu Ihrer `PATH`-Umgebungsvariablen hinzu.
-
-**Linux:**
+Unter Debian-basierten Systemen (wie Ubuntu):
 
 ```sh
+sudo apt-get update
 sudo apt-get install sox
-sudo apt-get install libsox-fmt-all
+sudo apt-get install nodejs
+sudo apt-get install npm
 ```
 
-**macOS:**
+Unter MacOS (unter Verwendung von Homebrew):
 
 ```sh
 brew install sox
+brew install node
 ```
 
-### Konfiguration
+Unter Windows:
 
-Erstellen Sie eine `.env` Datei im Stammverzeichnis und fügen Sie die erforderlichen Konfigurationen hinzu:
+1. Laden Sie SoX von [https://sox.sourceforge.net](https://sox.sourceforge.net) herunter und installieren Sie es.
+2. Laden Sie Node.js von [https://nodejs.org](https://nodejs.org) herunter und installieren Sie es. Dies wird auch npm
+   installieren.
 
-```
-OPENAI_API_KEY=<Ihr OpenAI API Schlüssel>
-OPENAI_API_ORG=<Ihre OpenAI Organisation>
-```
+## Installation
 
-### Ausführen des Tools
+1. Abhängigkeiten installieren:
+    ```sh
+    npm install
+    ```
+2. Environment-Datei einrichten:
+   Erstellen Sie eine Datei `.env` im Wurzelverzeichnis und fügen Sie Ihre OpenAI-API-Schlüssel hinzu:
 
-1. **Installieren Sie die Abhängigkeiten:**
+    ```
+    OPENAI_API_KEY=your_openai_api_key
+    OPENAI_API_ORG=your_openai_organization_id
+    ```
+
+## Verwendung
+
+Das Projekt kann im Entwicklungsmodus gestartet werden:
 
 ```sh
-npm install
+npm run dev
 ```
 
-2. **Projekt kompilieren und ausführen:**
+Oder als build version:
 
 ```sh
 npm start
 ```
 
-## Beitragende
+## Projektstruktur
 
-- Endre Bock
-- Open AI GPT-4o
+- `src/Application`: Enthält die Controller und Anfragedefinitionen, die als Schnittstelle zur Benutzerinteraktion
+  dienen.
+- `src/Core`: Enthält die Anwendungsfälle (UseCases), Services und Interfaces, welche die Geschäftslogik der Anwendung
+  implementieren.
+- `src/Infrastructure`: Enthält die Implementierungen der in Core definierten Interfaces und Anbindungen an externe
+  Bibliotheken und SDKs.
+- `src/index.ts`: Einstiegspunkt der Anwendung.
+
+## Architektur
+
+Das Projekt folgt dem Prinzip der Clean Architecture, was bedeutet, dass:
+
+- Die Geschäftslogik und Anwendungsfälle (Use Cases) im Core-Modul definiert sind.
+- Die Infrastruktur-Schicht Implementierungen für Schnittstellen im Core bereitstellt und die Interaktion mit externen
+  Diensten und Bibliotheken abwickelt.
+- Die Anwendungsschicht Controller und Request-Klassen enthält, die als Bindeglied zwischen der Benutzerinteraktion und
+  der Geschäftslogik dienen.
 
 ## Lizenz
 
-Dieses Projekt ist unter der MIT Lizenz lizenziert.
+Dieses Projekt steht unter der MIT Lizenz. Details finden Sie in der LICENSE Datei.

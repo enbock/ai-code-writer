@@ -2,12 +2,13 @@ import StartController from '../Application/StartController';
 import ConversationChatCompletionClientOpenAiChat
     from '../Infrastructure/Conversation/ChatCompletionClient/OpenAi/OpenAiChat';
 import AudioTransformClientOpenAiAudio from '../Infrastructure/AudioTransformClient/OpenAi/OpenAiAudio';
+import NodeAudioRecorder from '../Infrastructure/AudioRecorder/Node/NodeAudioRecorder';
+import NodeAudioPlayer from '../Infrastructure/AudioPlayer/Node/NodeAudioPlayer';
 import * as dotenv from 'dotenv';
 import {OpenAI} from 'openai';
 import AudioUseCase from '../Core/Audio/AudioUseCase';
-import NodeAudioRecorder from '../Infrastructure/AudioRecorder/Node/NodeAudioRecorder';
-import {SoxRecordingFactory} from '../Infrastructure/AudioRecorder/Node/SoxConnector/Recording';
 import ConversationUseCase from '../Core/Conversation/ConversationUseCase';
+import {SoxRecordingFactory} from '../Infrastructure/AudioRecorder/Node/SoxConnector/Recording';
 
 dotenv.config();
 
@@ -24,8 +25,10 @@ class GlobalContainer {
         this.apiKey,
         this.openAi
     );
+
     private audioRecorder: NodeAudioRecorder = new NodeAudioRecorder(SoxRecordingFactory);
-    private audioUseCase: AudioUseCase = new AudioUseCase(this.audioTransformClientOpenAi, this.audioRecorder);
+    private audioPlayer: NodeAudioPlayer = new NodeAudioPlayer();
+    private audioUseCase: AudioUseCase = new AudioUseCase(this.audioTransformClientOpenAi, this.audioRecorder, this.audioPlayer);
 
     private gptConversationUseCase: ConversationUseCase = new ConversationUseCase(this.conversationChatCompletionClientOpenAiChat);
 

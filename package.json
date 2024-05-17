@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "dotenv": "*",
-    "openai": "*"
+    "openai": "*",
+    "speaker": "*",
+    "node-web-audio-api": "*"
   },
   "devDependencies": {
     "@types/node": "*",
-    "typescript": "^5"
+    "typescript": "*"
   }
 }

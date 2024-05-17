@@ -21,5 +21,8 @@ export default class StartController {
         conversationRequest.transcription = response.transcription;
         const conversationResponse: string = await this.gptConversationUseCase.handleConversation(conversationRequest);
         console.log('Conversation Response:', conversationResponse);
+
+        const audioBuffer: Buffer = await this.audioUseCase.transformTextToAudio(conversationResponse);
+        await this.audioUseCase.playAudio(audioBuffer);
     }
 }

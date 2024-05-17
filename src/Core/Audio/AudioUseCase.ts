@@ -1,11 +1,13 @@
 import AudioTransformClient from './AudioTransformClient';
 import AudioRecorder from './AudioRecorder';
+import AudioPlayer from './AudioPlayer';
 import AudioResponse from './AudioResponse';
 
 export default class AudioUseCase {
     constructor(
         private audioTransformClient: AudioTransformClient,
-        private audioRecorder: AudioRecorder
+        private audioRecorder: AudioRecorder,
+        private audioPlayer: AudioPlayer
     ) {
     }
 
@@ -21,5 +23,13 @@ export default class AudioUseCase {
 
         response.audio = audioBuffer;
         response.transcription = transcription;
+    }
+
+    public async transformTextToAudio(text: string): Promise<Buffer> {
+        return this.audioTransformClient.transformTextToAudio(text);
+    }
+
+    public async playAudio(audioBuffer: Buffer): Promise<void> {
+        return this.audioPlayer.play(audioBuffer);
     }
 }
