@@ -34,7 +34,7 @@ export default class OpenAiAudio implements AudioTransformClient {
         };
 
         const data: Object = {
-            model: 'tts-1',
+            model: 'tts-1-hd',
             input: text,
             voice: 'nova',
             speed: 1

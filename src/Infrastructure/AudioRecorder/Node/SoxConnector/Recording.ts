@@ -14,7 +14,8 @@ export interface Options {
     audioType: string;        // audio type to record,
 }
 
-const debug = (...args: Array<any>) => console.log('Debug:', ...args);
+const isDebug: boolean = false;
+const debug = (...args: Array<any>): void => isDebug ? console.log('Debug:', ...args) : undefined;
 
 export class Recording {
     private readonly options: Options;
