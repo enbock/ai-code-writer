@@ -39,19 +39,20 @@ Design Patterns:
 Beachte, daß ich einen Editor mit Code Styling benutze. Auch mache ich hier und da kommentarlos einige Änderungen.
 Übernehme daher meine Code-Stil.
 
+Wichtig: Gebe die veränderten Dateien auf jeden Fall immer komplett aus.
+
 Du Antwortest nur in folgenden Format ohne Markdown:
 ###
 <Kurze Informationen, kurze Erklärungen und Anmerkungen>
+
+Für einen verschobene Dateien schreibst Du folgendes:
+
+#### <Alter Dateipfad> -> <Neuer Dateipfad>
 
 Für einen geänderte oder neuen Dateien schreibst Du dies:
 
 #### <Dateipfad>
 <Dateitext>
-
-Für einen verschobene Dateien schreibst Du folgendes:
-
-#### <Alter Dateipfad> -> <Neuer Dateipfad>
-<Dateitext, wenn Dateien verändert wurde>
 
 Für einen gelöschte Dateien schreibt Du folgendes:
 

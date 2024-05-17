@@ -1,4 +1,4 @@
-import AudioRecorder from '../../../Core/AudioRecorder';
+import AudioRecorder from '../../../Core/Audio/AudioRecorder';
 import {PassThrough} from 'stream';
 import {Recording, SoxRecordingFactory} from './SoxConnector/Recording';
 

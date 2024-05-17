@@ -4,9 +4,10 @@ import ConversationChatCompletionClientOpenAiChat
 import AudioTransformClientOpenAiAudio from '../Infrastructure/AudioTransformClient/OpenAi/OpenAiAudio';
 import * as dotenv from 'dotenv';
 import {OpenAI} from 'openai';
-import ConversationUseCase from '../Core/Conversation/ConversationUseCase';
+import AudioUseCase from '../Core/Audio/AudioUseCase';
 import NodeAudioRecorder from '../Infrastructure/AudioRecorder/Node/NodeAudioRecorder';
 import {SoxRecordingFactory} from '../Infrastructure/AudioRecorder/Node/SoxConnector/Recording';
+import ConversationUseCase from '../Core/Conversation/ConversationUseCase';
 
 dotenv.config();
 
@@ -24,9 +25,11 @@ class GlobalContainer {
         this.openAi
     );
     private audioRecorder: NodeAudioRecorder = new NodeAudioRecorder(SoxRecordingFactory);
-    private conversationUseCase: ConversationUseCase = new ConversationUseCase(this.audioTransformClientOpenAi, this.audioRecorder);
+    private audioUseCase: AudioUseCase = new AudioUseCase(this.audioTransformClientOpenAi, this.audioRecorder);
 
-    public startController: StartController = new StartController(this.conversationUseCase);
+    private gptConversationUseCase: ConversationUseCase = new ConversationUseCase(this.conversationChatCompletionClientOpenAiChat);
+
+    public startController: StartController = new StartController(this.audioUseCase, this.gptConversationUseCase);
 }
 
 const Container: GlobalContainer = new GlobalContainer();

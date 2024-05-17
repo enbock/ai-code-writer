@@ -1,4 +1,4 @@
-import AudioTransformClient from '../../../Core/AudioTransformClient';
+import AudioTransformClient from '../../../Core/Audio/AudioTransformClient';
 import {OpenAI} from 'openai';
 import FallbackAudio from './FallbackAudio';
 import {Transcription} from 'openai/resources/audio';
