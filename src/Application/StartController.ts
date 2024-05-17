@@ -11,7 +11,8 @@ export default class StartController {
     }
 
     public async start(): Promise<void> {
-        console.log('StartController is running...');
+        const helloAudio: Buffer = await this.audioUseCase.transformTextToAudio('AI Code Writer ist bereit und hört nun zu.');
+        await this.audioUseCase.playAudio(helloAudio);
 
         const response: AudioResponse = new AudioResponse();
         await this.audioUseCase.recordAndProcess(response);
@@ -22,7 +23,7 @@ export default class StartController {
         const conversationResponse: string = await this.gptConversationUseCase.handleConversation(conversationRequest);
         console.log('Conversation Response:', conversationResponse);
 
-        const audioBuffer: Buffer = await this.audioUseCase.transformTextToAudio(conversationResponse);
-        await this.audioUseCase.playAudio(audioBuffer);
+        const answerAudio: Buffer = await this.audioUseCase.transformTextToAudio(conversationResponse);
+        await this.audioUseCase.playAudio(answerAudio);
     }
 }
