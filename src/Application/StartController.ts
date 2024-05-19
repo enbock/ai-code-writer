@@ -43,18 +43,22 @@ export default class StartController {
         await this.gptConversationUseCase.handleConversation(conversationRequest, conversationResponse);
         console.log('Conversation Response:', conversationResponse.comments);
 
+        if (conversationResponse.actions.length > 0) {
+            void this.executeFileActions(conversationResponse.actions);
+        }
+
         if (conversationResponse.comments != '') {
             const answerAudio: Buffer = await this.audioUseCase.transformTextToAudio(conversationResponse.comments);
             await this.audioUseCase.playAudio(answerAudio);
         }
+    }
 
-        if (conversationResponse.actions.length > 0) {
-            this.directoryWatcher.pauseWatching();
-            const fileActionRequest: FileActionRequest = new FileActionRequest();
-            fileActionRequest.actions = conversationResponse.actions;
-            await this.fileActionUseCase.executeActions(fileActionRequest);
-            this.directoryWatcher.resumeWatching();
-        }
+    private async executeFileActions(actions: Array<string>): Promise<void> {
+        this.directoryWatcher.pauseWatching();
+        const fileActionRequest: FileActionRequest = new FileActionRequest();
+        fileActionRequest.actions = actions;
+        await this.fileActionUseCase.executeActions(fileActionRequest);
+        this.directoryWatcher.resumeWatching();
     }
 
     private async handleDirectoryChange(action: string, fileName: string): Promise<void> {
