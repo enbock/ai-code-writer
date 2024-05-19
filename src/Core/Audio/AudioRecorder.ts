@@ -1,3 +1,3 @@
 export default interface AudioRecorder {
-    startRecording(): Promise<Buffer>;
+    startRecording(): Promise<ThrowsErrorOrReturn<Error, Buffer>>;
 }

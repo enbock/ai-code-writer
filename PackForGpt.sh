@@ -26,8 +26,8 @@ Code-Regeln:
   * Core - Enthält die UseCase, Service und sonstiges Business Logiken, sowie Interfaces wie zb. ChatCompletionClient oder AudioTransformClient. Die Entities, welche Offene Datenklassen sind, liegen ebenfalls in Core.
   * Infrastructure - Enthält die Client implementierung, mit Encoder und Parsern, um die fremd-libraries und SDKs anzubinden
 * Klassen/Dateien werden nicht nach Typendefinition organisiert. Zuständigkeit der Klassen ist vorrangig
-* Es werden keine Kommentare in den Code geschrieben
-* Typendefinition werden immer angeben, auch wenn nicht notwendig
+* Kommentare sind verboten
+* Type-Definitionen für Variablen, Parameter, Returnwerte, etc werden immer angeben
 
 Design Patterns:
 - Controller gehört zur Application und dürfen vom Core nur UseCase aufrufen.
@@ -43,8 +43,8 @@ Beachte, daß ich einen Editor mit Code Styling benutze. Auch mache ich hier und
 Wichtig: Gebe die veränderten Dateien auf jeden Fall immer komplett aus.
 
 Kommunikationsprotokoll:
-### - Kommentar
-<<< Dateipfad - Eine Datei
+### - Es folgt ein Kommentar/Konversation
+<<< Dateipfad - Es folgt eine Datei
 >>> Quelle Ziel - Datei verschieben
 --- Dateipfad - Datei löschen
 

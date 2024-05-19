@@ -12,8 +12,10 @@ class RecordingHandler {
     private silenceDuration: number = 0;
     private silenceThreshold: number = 0;
     private MAX_SILENCE_DURATION: number = 1500;
+    private MAX_WAIT_DURATION: number = 10000;
     private audioInputDetected: boolean = false;
     private isSilenceLevelAdjusted: boolean = false;
+    private waitTimeout?: NodeJS.Timeout;
 
     constructor(private resolve: (value: Buffer | PromiseLike<Buffer>) => void, private reject: (reason?: any) => void) {
         this.registerEvents();
@@ -46,6 +48,7 @@ class RecordingHandler {
                 else {
                     this.silenceDuration = 0;
                     this.audioInputDetected = true;
+                    clearTimeout(this.waitTimeout);
                 }
 
                 if (this.silenceDuration >= this.MAX_SILENCE_DURATION && this.audioInputDetected) {
@@ -55,6 +58,14 @@ class RecordingHandler {
 
             micStream.on('end', () => this.streamEnded());
             micStream.on('error', (error: Error) => this.onError(error));
+
+            this.waitTimeout = setTimeout(() => {
+                if (!this.audioInputDetected) {
+                    console.log('No audio input detected. Stopping recording.');
+                    this.reject(new Error('No audio input detected within the time frame.'));
+                    this.stopRecording();
+                }
+            }, this.MAX_WAIT_DURATION);
         } catch (error: any) {
             this.reject(error);
         }
@@ -118,7 +129,7 @@ class RecordingHandler {
 }
 
 export default class Node implements AudioRecorder {
-    public async startRecording(): Promise<Buffer> {
+    public async startRecording(): Promise<ThrowsErrorOrReturn<Error, Buffer>> {
         return new Promise<Buffer>((resolve, reject): void => {
             const handler: RecordingHandler = new RecordingHandler(resolve, reject);
             handler.startRecording();

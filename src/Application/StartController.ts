@@ -18,6 +18,10 @@ export default class StartController {
         await this.audioUseCase.recordAndProcess(response);
         console.log('Transcription:', response.transcription);
 
+        if (response.transcription != '') await this.runConversation(response);
+    }
+
+    private async runConversation(response: AudioResponse) {
         const conversationRequest: ConversationRequest = new ConversationRequest();
         conversationRequest.transcription = response.transcription;
         const conversationResponse: string = await this.gptConversationUseCase.handleConversation(conversationRequest);

@@ -23,10 +23,10 @@ export default class OpenAiAudio implements AudioTransformClient {
                 response_format: 'json',
                 temperature: 1
             });
-            console.log('>>>', transcription);
             return transcription.text;
         } catch (error) {
-            throw error;
+            console.error('Transcription error', error);
+            return '';
         }
     }
 

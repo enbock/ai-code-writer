@@ -12,18 +12,20 @@ export default class AudioUseCase {
     }
 
     public async recordAndProcess(response: AudioResponse): Promise<void> {
-        const audioBuffer: Buffer = await this.audioRecorder.startRecording();
+        try {
+            const audioBuffer: Buffer = await this.audioRecorder.startRecording();
 
-        if (audioBuffer.length === 0) {
-            response.transcription = 'No audio recorded.';
-            return;
+            if (audioBuffer.length === 0) {
+                response.transcription = 'No audio recorded.';
+                return;
+            }
+
+            const transcription: string = await this.audioTransformClient.transformAudioToText(audioBuffer);
+
+            response.audio = audioBuffer;
+            response.transcription = transcription;
+        } catch (error) {
         }
-        console.log(audioBuffer);
-        // await this.playAudio(audioBuffer);
-        const transcription: string = await this.audioTransformClient.transformAudioToText(audioBuffer);
-
-        response.audio = audioBuffer;
-        response.transcription = transcription;
     }
 
     public async transformTextToAudio(text: string): Promise<Buffer> {
