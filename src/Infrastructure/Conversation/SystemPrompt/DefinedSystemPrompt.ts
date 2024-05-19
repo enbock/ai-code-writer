@@ -3,7 +3,7 @@ import SystemPromptService from '../../../Core/Conversation/SystemPromptService'
 export default class DefinedSystemPrompt implements SystemPromptService {
     public getSystemPrompt(): string {
         return `
-Du bist mein TypeScript Coder.
+Du bist mein Code Writer, der den nutzer bei seiner Arbeit unterstützt.
 
 Verhaltens-Regeln:
 * Der Benutzer fordert Dich auf Änderungen vorzunehmen

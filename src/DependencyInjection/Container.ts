@@ -20,8 +20,6 @@ import AudioUseCase from '../Core/Audio/AudioUseCase';
 import NodeAudioRecorderConfig from '../Infrastructure/AudioRecorder/Node/NodeAudioRecorderConfig';
 import ConversationUseCase from '../Core/Conversation/UseCase/ConversationUseCase';
 import AudioRecorder from '../Core/Audio/AudioRecorder';
-import SoxRecorder from '../Infrastructure/AudioRecorder/Sox/SoxRecorder';
-import {SoxRecordingFactory} from '../Infrastructure/AudioRecorder/Sox/SoxConnector/Recording';
 
 dotenv.config();
 
@@ -31,7 +29,6 @@ class GlobalContainer {
         organization: String(process.env.OPENAI_API_ORG || ''),
         apiKey: this.apiKey
     });
-    private useSoxAudioInput: boolean = String(process.env.USE_SOX_AUDIO_INPUT || '') === 'true';
 
     private conversationStorage: InMemoryConversationStorage = new InMemoryConversationStorage();
     private systemPromptService: SystemPromptServiceDefinedSystemPrompt = new SystemPromptServiceDefinedSystemPrompt();
@@ -56,10 +53,7 @@ class GlobalContainer {
     );
 
     private audioRecorderConfig: NodeAudioRecorderConfig = new NodeAudioRecorderConfig();
-    private audioRecorder: AudioRecorder = this.useSoxAudioInput
-        ? new SoxRecorder(SoxRecordingFactory)
-        : new NodeAudioRecorder(this.audioRecorderConfig)
-    ;
+    private audioRecorder: AudioRecorder = new NodeAudioRecorder(this.audioRecorderConfig);
     private audioPlayer: NodeAudioPlayer = new NodeAudioPlayer();
     private audioUseCase: AudioUseCase = new AudioUseCase(
         this.audioTransformClientOpenAi,

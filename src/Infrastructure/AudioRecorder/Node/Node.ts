@@ -17,6 +17,7 @@ class RecordingHandler {
     private isSilenceLevelAdjusted: boolean = false;
     private waitTimeout?: NodeJS.Timeout;
     private silenceLevels: Array<number> = [];
+    private firstFrameSkipped: boolean = false;
 
     constructor(
         private resolve: (value: Buffer | PromiseLike<Buffer>) => void,
@@ -29,51 +30,13 @@ class RecordingHandler {
     }
 
     public async startRecording(): Promise<void> {
+        this.isSilenceLevelAdjusted = this.silenceThreshold != 0;
         try {
             this.micInstance = new microphone();
             const micStream = this.micInstance.startRecording();
 
             micStream.on('data', (chunk: Buffer) => {
-                this.chunks.push(chunk);
-                if (this.passThrough.writable && !this.passThrough.writableEnded && !this.passThrough.writableFinished) {
-                    this.passThrough.write(chunk);
-                }
-
-                if (this.isStopped) return;
-
-                const detectionWindow: number = this.silenceThreshold != 0 ? this.config.SILENCE_DETECTION_WINDOW_HALVED : this.config.SILENCE_DETECTION_WINDOW;
-
-                if (this.silenceLevels.length < detectionWindow) {
-                    this.silenceLevels.push(this.getAudioLevel(chunk));
-                } else if (!this.isSilenceLevelAdjusted) {
-                    this.sanitizeHighLevelStartingValue();
-                    this.silenceThreshold = this.silenceLevels.reduce((a, b) => a + b, 0) / this.silenceLevels.length * this.config.silenceThresholdMultiplier;
-                    this.isSilenceLevelAdjusted = true;
-                    this.newSilenceThresholdCallback(this.silenceThreshold);
-                    console.log('Recording audio now.');
-                }
-
-                const isSilent = this.isSilenceLevelAdjusted && this.isSilentChunk(chunk);
-                if (isSilent) {
-                    this.silenceDuration += chunk.length / this.audioContext.sampleRate * 1000;
-                } else {
-                    this.silenceDuration = 0;
-                    if (!this.audioInputDetected && this.isSilenceLevelAdjusted) {
-                        this.audioInputDetected = true;
-                        clearTimeout(this.waitTimeout);
-                    }
-                }
-
-                if (this.silenceDuration >= this.config.MAX_SILENCE_DURATION && this.audioInputDetected) {
-                    this.stopRecording();
-                }
-
-                if (debug) console.log(
-                    'Audio:', this.getAudioLevel(chunk),
-                    'Threshold:', this.silenceThreshold,
-                    'isSilent:', isSilent, 'audioInputDetected:',
-                    this.audioInputDetected
-                );
+                this.handleData(chunk);
             });
 
             micStream.on('end', () => this.streamEnded());
@@ -90,12 +53,7 @@ class RecordingHandler {
         }
     }
 
-    private sanitizeHighLevelStartingValue() {
-        this.silenceLevels.shift();
-    }
-
     public stopRecording(): void {
-        if (this.isStopped) return;
         this.isStopped = true;
         if (this.micInstance) {
             this.micInstance.stopRecording();
@@ -105,6 +63,81 @@ class RecordingHandler {
             this.passThrough.end();
         }
         this.audioContext.close().catch((error: Error) => console.error('Error closing audio context:', error));
+    }
+
+    private handleData(chunk: Buffer): void {
+        this.storeChunk(chunk);
+        if (!this.firstFrameSkipped) {
+            this.skipFirstFrame();
+            return;
+        }
+        if (this.isStopped) return;
+        if (!this.isSilenceLevelAdjusted) this.adjustSilenceLevel(chunk);
+        this.processAudioChunk(chunk);
+    }
+
+    private storeChunk(chunk: Buffer): void {
+        this.chunks.push(chunk);
+        if (this.passThrough.writable && !this.passThrough.writableEnded && !this.passThrough.writableFinished) {
+            this.passThrough.write(chunk);
+        }
+    }
+
+    private skipFirstFrame(): void {
+        this.firstFrameSkipped = true;
+    }
+
+    private processAudioChunk(chunk: Buffer): void {
+        const isSilent = this.isSilenceLevelAdjusted && this.isSilentChunk(chunk);
+        if (isSilent) {
+            this.incrementSilenceDuration(chunk);
+        } else {
+            this.resetSilenceDuration();
+        }
+        if (this.shouldStopRecording()) {
+            this.stopRecording();
+        }
+        if (debug) this.logDebugInfo(chunk, isSilent);
+    }
+
+    private incrementSilenceDuration(chunk: Buffer): void {
+        this.silenceDuration += chunk.length / this.audioContext.sampleRate * 1000;
+    }
+
+    private resetSilenceDuration(): void {
+        this.silenceDuration = 0;
+        if (!this.audioInputDetected && this.isSilenceLevelAdjusted) {
+            this.audioInputDetected = true;
+            clearTimeout(this.waitTimeout);
+        }
+    }
+
+    private shouldStopRecording(): boolean {
+        return this.silenceDuration >= this.config.MAX_SILENCE_DURATION && this.audioInputDetected;
+    }
+
+    private logDebugInfo(chunk: Buffer, isSilent: boolean): void {
+        console.log(
+            'Audio:', this.getAudioLevel(chunk),
+            'Threshold:', this.silenceThreshold,
+            'isSilent:', isSilent, 'audioInputDetected:',
+            this.audioInputDetected
+        );
+    }
+
+    private adjustSilenceLevel(chunk: Buffer): void {
+        if (this.silenceLevels.length < this.config.SILENCE_DETECTION_WINDOW) {
+            this.silenceLevels.push(this.getAudioLevel(chunk));
+        } else {
+            this.sanitizeHighLevelStartingValue();
+            this.silenceThreshold = this.silenceLevels.reduce((a, b) => a + b, 0) / this.silenceLevels.length * this.config.silenceThresholdMultiplier;
+            this.isSilenceLevelAdjusted = true;
+            this.newSilenceThresholdCallback(this.silenceThreshold);
+        }
+    }
+
+    private sanitizeHighLevelStartingValue() {
+        this.silenceLevels.shift();
     }
 
     private isSilentChunk(chunk: Buffer): boolean {
@@ -142,6 +175,7 @@ class RecordingHandler {
         if (!this.isStopped) {
             this.stopRecording();
         }
+        this.reject(error);
     }
 }
 
@@ -162,10 +196,27 @@ export default class Node implements AudioRecorder {
         return buffer;
     }
 
+    public async measureNoiseLevel(): Promise<void> {
+        return new Promise<void>((resolve, reject): void => {
+            const handler: RecordingHandler = new RecordingHandler(
+                () => resolve(),
+                reject,
+                this.config,
+                this.silenceThreshold,
+                this.changeSilenceThreshold.bind(this)
+            );
+            handler.startRecording().catch((error) => {
+                reject(error);
+            });
+            setTimeout(() => {
+                handler.stopRecording();
+            }, this.config.NOISE_MEASUREMENT_DURATION);
+        });
+    }
+
     private runRecording() {
         return new Promise<Buffer>((resolve, reject): void => {
             const retryCallback = () => {
-                console.log('Checking noise.');
                 const handler: RecordingHandler = new RecordingHandler(
                     resolve,
                     reject,
@@ -173,8 +224,7 @@ export default class Node implements AudioRecorder {
                     this.silenceThreshold,
                     this.changeSilenceThreshold.bind(this)
                 );
-                handler.startRecording().catch((error) => {
-                    console.error('Recording error:', error);
+                handler.startRecording().catch(() => {
                     retryCallback();
                 });
             };

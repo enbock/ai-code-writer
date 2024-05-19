@@ -28,4 +28,8 @@ export default class AudioUseCase {
     public async playAudio(audioBuffer: Buffer): Promise<void> {
         return this.audioPlayer.play(audioBuffer);
     }
+
+    public async measureNoiseLevel(): Promise<void> {
+        return this.audioRecorder.measureNoiseLevel();
+    }
 }

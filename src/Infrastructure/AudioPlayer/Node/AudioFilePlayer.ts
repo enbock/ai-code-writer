@@ -43,14 +43,16 @@ export default class AudioFilePlayer {
             output: process.stdout
         });
 
-        rl.on('line', () => {
-            this.stop();
+        rl.on('line', async () => {
             rl.close();
+            await this.stop();
+            this.endCallback();
         });
 
         await new Promise<void>((resolve) => {
             source.onended = (_: Event) => resolve();
         });
+        rl.close();
         await this.cleanAudio();
         this.endCallback();
     }

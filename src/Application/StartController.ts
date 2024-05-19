@@ -21,7 +21,9 @@ export default class StartController {
     public async start(): Promise<void> {
         await this.gptConversationUseCase.initialize();
         this.directoryWatcher.startWatching();
-        const helloAudio: Buffer = await this.audioUseCase.transformTextToAudio('Der K.I. Code Writer ist bereit und hört nun zu.');
+        await this.audioUseCase.measureNoiseLevel();
+        const helloAudio: Buffer = await this.audioUseCase.transformTextToAudio('Der K.I. Code Writer ist bereit.');
+        console.log('Der K.I. Code Writer ist bereit.');
         await this.audioUseCase.playAudio(helloAudio);
 
         // noinspection InfiniteLoopJS
