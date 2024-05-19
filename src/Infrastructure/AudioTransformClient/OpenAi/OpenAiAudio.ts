@@ -17,17 +17,14 @@ export default class OpenAiAudio implements AudioTransformClient {
         const file: File = new File([audioBuffer], 'audio.wav', {type: 'audio/wav'});
 
         try {
-            console.log('Sending audio file for transcription to OpenAI...');
             const transcription: Transcription = await this.openAi.audio.transcriptions.create({
                 file: file,
                 model: 'whisper-1',
                 response_format: 'json',
                 temperature: 1
             });
-            console.log('Received transcription from OpenAI.');
             return transcription.text;
         } catch (error) {
-            console.error('Transcription error', error);
             return '';
         }
     }
@@ -46,7 +43,6 @@ export default class OpenAiAudio implements AudioTransformClient {
         };
 
         try {
-            console.log('Sending text for TTS conversion to OpenAI...');
             const response: Response = await fetch(this.apiUrl, {
                 method: 'POST',
                 headers: headers,
@@ -54,13 +50,10 @@ export default class OpenAiAudio implements AudioTransformClient {
             });
 
             if (response.ok == false) {
-                console.error(new Error(`Error: ${response.statusText}`));
                 return Buffer.from(OpenAiAudio.FALLBACK, 'base64');
             }
-            console.log('Received audio from OpenAI.');
             return await this.convertAudio(response);
         } catch (error) {
-            console.error('Error generating speech:', error);
             return Buffer.from(OpenAiAudio.FALLBACK, 'base64');
         }
     }
@@ -71,3 +64,4 @@ export default class OpenAiAudio implements AudioTransformClient {
         return Buffer.from(audioBuffer);
     }
 }
+

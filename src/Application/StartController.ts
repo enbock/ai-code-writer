@@ -21,7 +21,7 @@ export default class StartController {
     public async start(): Promise<void> {
         await this.gptConversationUseCase.initialize();
         this.directoryWatcher.startWatching();
-        const helloAudio: Buffer = await this.audioUseCase.transformTextToAudio('AI Code Writer ist bereit und hört nun zu.');
+        const helloAudio: Buffer = await this.audioUseCase.transformTextToAudio('Der K.I. Code Writer ist bereit und hört nun zu.');
         await this.audioUseCase.playAudio(helloAudio);
 
         // noinspection InfiniteLoopJS
@@ -29,7 +29,7 @@ export default class StartController {
             const response: AudioResponse = new AudioResponse();
 
             await this.audioUseCase.recordAndProcess(response);
-            console.log('Transcription:', response.transcription);
+            console.log('Ihre Eingabe:', response.transcription);
 
             if (response.transcription != '') await this.runConversation(response);
         }
@@ -39,9 +39,11 @@ export default class StartController {
         const conversationRequest: ConversationRequest = new ConversationRequest();
         conversationRequest.transcription = response.transcription;
 
+
+        console.log('Starte KI Anfrage');
         const conversationResponse = new ConversationResponse();
         await this.gptConversationUseCase.handleConversation(conversationRequest, conversationResponse);
-        console.log('Conversation Response:', conversationResponse.comments);
+        console.log('KI Antwort:', conversationResponse.comments);
 
         if (conversationResponse.actions.length > 0) {
             void this.executeFileActions(conversationResponse.actions);
