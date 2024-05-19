@@ -1,4 +1,5 @@
 import FileSystemHandler from './FileSystemHandler';
+import FileActionRequest from './FileActionRequest';
 
 export default class FileActionUseCase {
     constructor(
@@ -6,8 +7,8 @@ export default class FileActionUseCase {
     ) {
     }
 
-    public async executeActions(actions: Array<string>): Promise<void> {
-        for (const action of actions) {
+    public async executeActions(request: FileActionRequest): Promise<void> {
+        for (const action of request.actions) {
             await this.processAction(action);
         }
     }
@@ -31,4 +32,3 @@ export default class FileActionUseCase {
         }
     }
 }
-

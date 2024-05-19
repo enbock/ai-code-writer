@@ -1,9 +1,11 @@
 import StartController from '../Application/StartController';
-import ConversationChatCompletionClientOpenAiChat from '../Infrastructure/Conversation/ChatCompletionClient/OpenAi/OpenAiChat';
+import ConversationChatCompletionClientOpenAiChat
+    from '../Infrastructure/Conversation/ChatCompletionClient/OpenAi/OpenAiChat';
 import AudioTransformClientOpenAiAudio from '../Infrastructure/AudioTransformClient/OpenAi/OpenAiAudio';
 import NodeAudioRecorder from '../Infrastructure/AudioRecorder/Node/Node';
 import NodeAudioPlayer from '../Infrastructure/AudioPlayer/Node/Node';
-import InMemoryConversationStorage from '../Infrastructure/Conversation/ConversationStorage/InMemoryConversationStorage';
+import InMemoryConversationStorage
+    from '../Infrastructure/Conversation/ConversationStorage/InMemoryConversationStorage';
 import SystemPromptServiceDefinedSystemPrompt from '../Infrastructure/Conversation/SystemPrompt/DefinedSystemPrompt';
 import FileConversationLogger from '../Infrastructure/Conversation/ConversationLogger/FileConversationLogger';
 import FileSystemActionHandler from '../Infrastructure/FileActions/FileSystemActionHandler';
@@ -15,8 +17,8 @@ import FsDirectoryWatcher from '../Infrastructure/FileActions/FsDirectoryWatcher
 import * as dotenv from 'dotenv';
 import {OpenAI} from 'openai';
 import AudioUseCase from '../Core/Audio/AudioUseCase';
-import ConversationUseCase from '../Core/Conversation/ConversationUseCase';
 import NodeAudioRecorderConfig from '../Infrastructure/AudioRecorder/Node/NodeAudioRecorderConfig';
+import ConversationUseCase from '../Core/Conversation/UseCase/ConversationUseCase';
 
 dotenv.config();
 
@@ -57,7 +59,7 @@ class GlobalContainer {
         this.audioRecorder,
         this.audioPlayer
     );
-    private gptConversationUseCase: ConversationUseCase = new ConversationUseCase(
+    private conversationUseCase: ConversationUseCase = new ConversationUseCase(
         this.conversationChatCompletionClientOpenAiChat,
         this.conversationStorage,
         this.conversationLogger,
@@ -74,7 +76,7 @@ class GlobalContainer {
     );
     public startController: StartController = new StartController(
         this.audioUseCase,
-        this.gptConversationUseCase,
+        this.conversationUseCase,
         this.fileActionUseCase,
         this.directoryWatcher
     );

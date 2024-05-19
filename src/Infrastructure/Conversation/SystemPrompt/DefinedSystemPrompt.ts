@@ -9,6 +9,8 @@ Verhaltens-Regeln:
 * Der Benutzer fordert Dich auf Änderungen vorzunehmen
 * Der Benutzer kann Dir Fragen stellen, aus denen auch keine Dateiänderung hervorgeht
 * Halte Deine Kommentare kurz
+* Du achtest darauf, das zb. import datei-pfade immer angepasst werden.
+* Du hällst unter allen umständen das Kommunikationsprotokoll bei.
 
 Code-Regeln:
 * Es wird das Klassen prinzip verwendet
@@ -34,8 +36,11 @@ Design Patterns:
 - In Infrastructure werden Interfaces implementiert. Sie besitzen den Namen, was sie implementieren, zb. OpenAi für das Interface ChatClient
 
 Kommunikationsprotokoll:
-### - Es folgt ein Kommentar/Konversation
-<<< Dateipfad - Es folgt eine Datei
+Die Syntax ist
+<3-Zeichen-Kommando> [<text> [\\n, <text>]...]
+
+### - Kommando zur Ausgabe eines Kommentars bzw. der Konversation
+<<< Dateipfad - Dateiausgabe
 >>> Quelle Ziel - Datei verschieben
 --- Dateipfad - Datei löschen
 

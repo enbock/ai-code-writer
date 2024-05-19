@@ -1,9 +1,10 @@
 import AudioUseCase from '../Core/Audio/AudioUseCase';
 import AudioResponse from './AudioResponse';
-import ConversationUseCase from '../Core/Conversation/ConversationUseCase';
+import ConversationUseCase from '../Core/Conversation/UseCase/ConversationUseCase';
 import ConversationRequest from './ConversationRequest';
 import ConversationResponse from './ConversationResponse';
 import FileActionUseCase from '../Core/FileActions/FileActionUseCase';
+import FileActionRequest from './FileActionRequest';
 import DirectoryWatcher from '../Core/FileActions/DirectoryWatcher';
 
 export default class StartController {
@@ -48,7 +49,9 @@ export default class StartController {
 
         if (conversationResponse.actions.length > 0) {
             this.directoryWatcher.pauseWatching();
-            await this.fileActionUseCase.executeActions(conversationResponse.actions);
+            const fileActionRequest: FileActionRequest = new FileActionRequest();
+            fileActionRequest.actions = conversationResponse.actions;
+            await this.fileActionUseCase.executeActions(fileActionRequest);
             this.directoryWatcher.resumeWatching();
         }
     }

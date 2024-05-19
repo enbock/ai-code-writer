@@ -1,12 +1,12 @@
-import ChatCompletionClient from './ChatCompletionClient';
-import ConversationStorage from './ConversationStorage';
-import ConversationLogger from './ConversationLogger';
-import SystemPromptService from './SystemPromptService';
-import GptResponseProcessor from '../Processor/GptResponseProcessor';
-import FileCollectorService from './FileCollectorService';
 import {ChatCompletionMessageParam} from 'openai/resources';
 import ConversationRequest from './ConversationRequest';
 import ConversationResponse from './ConversationResponse';
+import ChatCompletionClient from '../ChatCompletionClient';
+import ConversationStorage from '../ConversationStorage';
+import ConversationLogger from '../ConversationLogger';
+import SystemPromptService from '../SystemPromptService';
+import GptResponseProcessor from '../../Processor/GptResponseProcessor';
+import FileCollectorService from '../FileCollectorService';
 
 export default class ConversationUseCase {
     private conversationHistory: Array<ChatCompletionMessageParam> = [];
