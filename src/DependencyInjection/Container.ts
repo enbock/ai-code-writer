@@ -1,11 +1,9 @@
 import StartController from '../Application/StartController';
-import ConversationChatCompletionClientOpenAiChat
-    from '../Infrastructure/Conversation/ChatCompletionClient/OpenAi/OpenAiChat';
+import ConversationChatCompletionClientOpenAiChat from '../Infrastructure/Conversation/ChatCompletionClient/OpenAi/OpenAiChat';
 import AudioTransformClientOpenAiAudio from '../Infrastructure/AudioTransformClient/OpenAi/OpenAiAudio';
 import NodeAudioRecorder from '../Infrastructure/AudioRecorder/Node/Node';
 import NodeAudioPlayer from '../Infrastructure/AudioPlayer/Node/Node';
-import InMemoryConversationStorage
-    from '../Infrastructure/Conversation/ConversationStorage/InMemoryConversationStorage';
+import InMemoryConversationStorage from '../Infrastructure/Conversation/ConversationStorage/InMemoryConversationStorage';
 import SystemPromptServiceDefinedSystemPrompt from '../Infrastructure/Conversation/SystemPrompt/DefinedSystemPrompt';
 import FileConversationLogger from '../Infrastructure/Conversation/ConversationLogger/FileConversationLogger';
 import FileSystemActionHandler from '../Infrastructure/FileActions/FileSystemActionHandler';
@@ -13,10 +11,12 @@ import GptResponseProcessor from '../Core/Processor/GptResponseProcessor';
 import FileCollectorService from '../Core/Conversation/FileCollectorService';
 import FileCollector from '../Infrastructure/Conversation/FileCollector/FileCollector';
 import FileActionUseCase from '../Core/FileActions/FileActionUseCase';
+import FsDirectoryWatcher from '../Infrastructure/FileActions/FsDirectoryWatcher';
 import * as dotenv from 'dotenv';
 import {OpenAI} from 'openai';
 import AudioUseCase from '../Core/Audio/AudioUseCase';
 import ConversationUseCase from '../Core/Conversation/ConversationUseCase';
+import NodeAudioRecorderConfig from '../Infrastructure/AudioRecorder/Node/NodeAudioRecorderConfig';
 
 dotenv.config();
 
@@ -36,8 +36,8 @@ class GlobalContainer {
     private fileCollectorService: FileCollectorService = new FileCollector(
         '.',
         ['*.ts', '*.json', '*.yaml'],
-        ['node_modules', 'build'],
-        ['package-lock.json', '.*']
+        ['node_modules', 'build', '.git'],
+        ['package-lock.json', 'conversation_log.txt', '.*']
     );
 
     private conversationChatCompletionClientOpenAiChat: ConversationChatCompletionClientOpenAiChat = new ConversationChatCompletionClientOpenAiChat(
@@ -48,7 +48,9 @@ class GlobalContainer {
         this.apiKey,
         this.openAi
     );
-    private audioRecorder: NodeAudioRecorder = new NodeAudioRecorder();
+
+    private audioRecorderConfig: NodeAudioRecorderConfig = new NodeAudioRecorderConfig();
+    private audioRecorder: NodeAudioRecorder = new NodeAudioRecorder(this.audioRecorderConfig);
     private audioPlayer: NodeAudioPlayer = new NodeAudioPlayer();
     private audioUseCase: AudioUseCase = new AudioUseCase(
         this.audioTransformClientOpenAi,
@@ -64,10 +66,17 @@ class GlobalContainer {
         this.fileCollectorService
     );
     private fileActionUseCase: FileActionUseCase = new FileActionUseCase(this.fileSystemActionHandler);
+    private directoryWatcher: FsDirectoryWatcher = new FsDirectoryWatcher(
+        '.',
+        ['*.ts', '*.json', '*.yaml'],
+        ['node_modules', 'build', '.git'],
+        ['package-lock.json', 'conversation_log.txt', '.*']
+    );
     public startController: StartController = new StartController(
         this.audioUseCase,
         this.gptConversationUseCase,
-        this.fileActionUseCase
+        this.fileActionUseCase,
+        this.directoryWatcher
     );
 }
 

@@ -25,15 +25,15 @@ export default class GptResponseProcessor {
             comments.push(...sectionComments);
             actions.push(...sectionActions);
         }
-
-        return {comments: comments.filter(comment => comment), actions};
+        console.log('???>>>>', comments, actions, currentSection, lines);
+        return {comments: comments, actions: actions};
     }
 
     private async processSection(section: Array<string>): Promise<{ comments: string[], actions: string[] }> {
         const command: string = section.shift()!;
 
         if (command.startsWith('###')) {
-            return {comments: [section.join('\n')], actions: []};
+            return {comments: [command.replace(/^### /, '') + section.join('\n')], actions: []};
         } else if (command.startsWith('<<<')) {
             const filePath: string = command.slice(3).trim();
             const content: string = section.join('\n');

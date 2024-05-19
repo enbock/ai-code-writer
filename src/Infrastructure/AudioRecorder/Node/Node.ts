@@ -2,6 +2,7 @@ import AudioRecorder from '../../../Core/Audio/AudioRecorder';
 import {PassThrough} from 'stream';
 import {AudioContext} from 'node-web-audio-api';
 import microphone from 'node-microphone';
+import NodeAudioRecorderConfig from './NodeAudioRecorderConfig';
 
 class RecordingHandler {
     private chunks: Buffer[] = [];
@@ -11,13 +12,16 @@ class RecordingHandler {
     private micInstance: any;
     private silenceDuration: number = 0;
     private silenceThreshold: number = 0;
-    private MAX_SILENCE_DURATION: number = 1500;
-    private MAX_WAIT_DURATION: number = 10000;
     private audioInputDetected: boolean = false;
     private isSilenceLevelAdjusted: boolean = false;
     private waitTimeout?: NodeJS.Timeout;
+    private silenceLevels: Array<number> = [];
 
-    constructor(private resolve: (value: Buffer | PromiseLike<Buffer>) => void, private reject: (reason?: any) => void) {
+    constructor(
+        private resolve: (value: Buffer | PromiseLike<Buffer>) => void,
+        private reject: (reason?: any) => void,
+        private config: NodeAudioRecorderConfig
+    ) {
         this.registerEvents();
     }
 
@@ -34,16 +38,15 @@ class RecordingHandler {
 
                 if (this.isStopped) return;
 
-                let isSilent = false;
-                if (this.isSilenceLevelAdjusted) {
-                    isSilent = this.isSilentChunk(chunk);
-                }
-                if (this.chunks.length <= 3 && this.isSilenceLevelAdjusted == false) {
-                    this.silenceThreshold = this.getSilenceLevel() * 1.1;
+                if (this.silenceLevels.length < this.config.SILENCE_DETECTION_WINDOW) {
+                    this.silenceLevels.push(this.getAudioLevel(chunk));
+                } else if (!this.isSilenceLevelAdjusted) {
+                    this.silenceThreshold = this.silenceLevels.reduce((a, b) => a + b, 0) / this.silenceLevels.length * this.config.silenceThresholdMultiplier;
                     this.isSilenceLevelAdjusted = true;
                     console.log('Aufzeichnung läuft.');
                 }
 
+                let isSilent: boolean = this.isSilenceLevelAdjusted == false || this.isSilentChunk(chunk);
                 if (isSilent) this.silenceDuration += chunk.length / this.audioContext.sampleRate * 1000;
                 else {
                     this.silenceDuration = 0;
@@ -51,11 +54,11 @@ class RecordingHandler {
                     clearTimeout(this.waitTimeout);
                 }
 
-                if (this.silenceDuration >= this.MAX_SILENCE_DURATION && this.audioInputDetected) {
+                if (this.silenceDuration >= this.config.MAX_SILENCE_DURATION && this.audioInputDetected) {
                     this.stopRecording();
                 }
 
-                console.log('Audio:', this.getAudioLevel(chunk), 'Silence:', this.silenceThreshold, 'isSilent:', isSilent);
+                // console.log('Audio:', this.getAudioLevel(chunk), 'Silence:', this.silenceThreshold, 'isSilent:', isSilent);
             });
 
             micStream.on('end', () => this.streamEnded());
@@ -67,16 +70,10 @@ class RecordingHandler {
                     this.reject(new Error('No audio input detected within the time frame.'));
                     this.stopRecording();
                 }
-            }, this.MAX_WAIT_DURATION);
+            }, this.config.MAX_WAIT_DURATION);
         } catch (error: any) {
             this.reject(error);
         }
-    }
-
-    private getSilenceLevel(): number {
-        let sum: number = 0;
-        this.chunks.forEach(c => sum += this.getAudioLevel(c));
-        return sum / this.chunks.length;
     }
 
     private isSilentChunk(chunk: Buffer): boolean {
@@ -131,9 +128,14 @@ class RecordingHandler {
 }
 
 export default class Node implements AudioRecorder {
+    constructor(
+        private config: NodeAudioRecorderConfig
+    ) {
+    }
+
     public async startRecording(): Promise<ThrowsErrorOrReturn<Error, Buffer>> {
         return new Promise<Buffer>((resolve, reject): void => {
-            const handler: RecordingHandler = new RecordingHandler(resolve, reject);
+            const handler: RecordingHandler = new RecordingHandler(resolve, reject, this.config);
             handler.startRecording();
         });
     }

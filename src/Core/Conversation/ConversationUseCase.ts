@@ -45,4 +45,10 @@ export default class ConversationUseCase {
         response.comments = comments.join('\n');
         response.actions = actions;
     }
+
+    public async addToConversationHistory(request: ConversationRequest): Promise<void> {
+        this.conversationHistory.push({role: 'user', content: request.transcription});
+        await this.conversationStorage.saveConversation(this.conversationHistory);
+        await this.conversationLogger.logConversation(this.conversationHistory);
+    }
 }
