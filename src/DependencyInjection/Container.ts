@@ -4,6 +4,8 @@ import ConversationChatCompletionClientOpenAiChat
 import AudioTransformClientOpenAiAudio from '../Infrastructure/AudioTransformClient/OpenAi/OpenAiAudio';
 import NodeAudioRecorder from '../Infrastructure/AudioRecorder/Node/Node';
 import NodeAudioPlayer from '../Infrastructure/AudioPlayer/Node/Node';
+import InMemoryConversationStorage
+    from '../Infrastructure/Conversation/ConversationStorage/InMemoryConversationStorage';
 import * as dotenv from 'dotenv';
 import {OpenAI} from 'openai';
 import AudioUseCase from '../Core/Audio/AudioUseCase';
@@ -17,6 +19,8 @@ class GlobalContainer {
         organization: String(process.env.OPENAI_API_ORG || ''),
         apiKey: this.apiKey
     });
+
+    private conversationStorage: InMemoryConversationStorage = new InMemoryConversationStorage();
     private conversationChatCompletionClientOpenAiChat: ConversationChatCompletionClientOpenAiChat = new ConversationChatCompletionClientOpenAiChat(
         this.openAi
     );
@@ -33,7 +37,8 @@ class GlobalContainer {
         this.audioPlayer
     );
     private gptConversationUseCase: ConversationUseCase = new ConversationUseCase(
-        this.conversationChatCompletionClientOpenAiChat
+        this.conversationChatCompletionClientOpenAiChat,
+        this.conversationStorage
     );
     public startController: StartController = new StartController(
         this.audioUseCase,

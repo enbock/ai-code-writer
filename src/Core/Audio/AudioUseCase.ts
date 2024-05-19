@@ -21,6 +21,7 @@ export default class AudioUseCase {
             }
 
             const transcription: string = await this.audioTransformClient.transformAudioToText(audioBuffer);
+            if (transcription == '' || transcription.length < 2) return;
 
             response.audio = audioBuffer;
             response.transcription = transcription;
