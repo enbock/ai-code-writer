@@ -3,6 +3,6 @@ export default interface DirectoryWatcher {
     stopWatching(): void;
     pauseWatching(): void;
     resumeWatching(): void;
-    onChange(callback: (action: string) => void): void;
+    onChange(callback: (action: string, fileName: string) => void): void;
 }
 

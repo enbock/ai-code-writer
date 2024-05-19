@@ -6,6 +6,7 @@ import ConversationResponse from './ConversationResponse';
 import FileActionUseCase from '../Core/FileActions/FileActionUseCase';
 import FileActionRequest from './FileActionRequest';
 import DirectoryWatcher from '../Core/FileActions/DirectoryWatcher';
+import AddToConversationHistoryRequest from './AddToConversationHistoryRequest';
 
 export default class StartController {
     constructor(
@@ -56,11 +57,12 @@ export default class StartController {
         }
     }
 
-    private async handleDirectoryChange(action: string): Promise<void> {
-        const conversationRequest: ConversationRequest = new ConversationRequest();
-        conversationRequest.transcription = action;
+    private async handleDirectoryChange(action: string, fileName: string): Promise<void> {
+        const addToConversationHistoryRequest: AddToConversationHistoryRequest = new AddToConversationHistoryRequest();
+        addToConversationHistoryRequest.transcription = `${action} ${fileName}`;
+        addToConversationHistoryRequest.fileName = fileName;
 
-        await this.gptConversationUseCase.addToConversationHistory(conversationRequest);
-        console.log('Directory Change Recorded:', action);
+        await this.gptConversationUseCase.addToConversationHistory(addToConversationHistoryRequest);
+        console.log('Directory Change Recorded:', fileName);
     }
 }

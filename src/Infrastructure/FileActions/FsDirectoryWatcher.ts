@@ -4,7 +4,8 @@ import * as path from 'path';
 
 export default class FsDirectoryWatcher implements DirectoryWatcher {
     private watchers: Array<fs.FSWatcher> = [];
-    private callback: (action: string) => void = () => {};
+    private callback: (action: string, fileName: string) => void = () => {
+    };
     private watching: boolean = true;
 
     constructor(
@@ -12,7 +13,8 @@ export default class FsDirectoryWatcher implements DirectoryWatcher {
         private includePatterns: Array<string>,
         private excludeDirs: Array<string>,
         private excludeFiles: Array<string>
-    ) {}
+    ) {
+    }
 
     public startWatching(): void {
         this.watchDirectory(this.directory);
@@ -31,7 +33,7 @@ export default class FsDirectoryWatcher implements DirectoryWatcher {
         this.watching = true;
     }
 
-    public onChange(callback: (action: string) => void): void {
+    public onChange(callback: (action: string, fileName: string) => void): void {
         this.callback = callback;
     }
 
@@ -72,13 +74,13 @@ export default class FsDirectoryWatcher implements DirectoryWatcher {
             if (eventType === 'rename') {
                 fs.stat(filePath, (err, stats) => {
                     if (err) {
-                        this.callback(`--- ${filePath}`);
+                        this.callback(`--- ${filePath}`, filePath);
                     } else if (stats.isFile()) {
-                        this.callback(`<<< ${filePath}\n${fs.readFileSync(filePath, 'utf8')}`);
+                        this.callback(`<<< ${filePath}\n${fs.readFileSync(filePath, 'utf8')}`, filePath);
                     }
                 });
             } else if (eventType === 'change') {
-                this.callback(`<<< ${filePath}\n${fs.readFileSync(filePath, 'utf8')}`);
+                this.callback(`<<< ${filePath}\n${fs.readFileSync(filePath, 'utf8')}`, filePath);
             }
         });
 
