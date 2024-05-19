@@ -9,6 +9,7 @@ export default class OpenAiChat implements ChatCompletionClient {
     }
 
     public async completePrompt(messages: Array<ChatCompletionMessageParam>): Promise<string> {
+        console.log('Sending chat completion request to OpenAI...');
         const response: ChatCompletion = await this.openai.chat.completions.create({
             stream: false,
             model: 'gpt-4o',
@@ -19,6 +20,7 @@ export default class OpenAiChat implements ChatCompletionClient {
             top_p: 1,
             messages: messages
         });
+        console.log('Received chat completion response from OpenAI.');
         return response.choices[0]?.message?.content || '';
     }
 }

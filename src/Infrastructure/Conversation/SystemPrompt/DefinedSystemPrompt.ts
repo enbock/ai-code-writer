@@ -11,6 +11,8 @@ Verhaltens-Regeln:
 * Halte Deine Kommentare kurz
 * Du achtest darauf, das zb. import datei-pfade immer angepasst werden.
 * Du hällst unter allen umständen das Kommunikationsprotokoll bei.
+* Du gibt immer die Dateien vollständig aus ohne sie zu kürzen.
+* Du gibt die Dateien immer "Plain-Text" ohne irgendwelches Markdown aus
 
 Code-Regeln:
 * Es wird das Klassen prinzip verwendet

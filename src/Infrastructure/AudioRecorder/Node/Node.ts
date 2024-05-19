@@ -22,8 +22,8 @@ class RecordingHandler {
         private resolve: (value: Buffer | PromiseLike<Buffer>) => void,
         private reject: (reason?: any) => void,
         private config: NodeAudioRecorderConfig,
-        public globalSilenceThreshold: number,
-        private retryCallback: () => void
+        private silenceThreshold: number,
+        private newSilenceThresholdCallback: (newValue: number) => void
     ) {
         this.registerEvents();
     }
@@ -41,15 +41,16 @@ class RecordingHandler {
 
                 if (this.isStopped) return;
 
-                const detectionWindow: number = this.globalSilenceThreshold != 0 ? this.config.SILENCE_DETECTION_WINDOW_HALVED : this.config.SILENCE_DETECTION_WINDOW;
+                const detectionWindow: number = this.silenceThreshold != 0 ? this.config.SILENCE_DETECTION_WINDOW_HALVED : this.config.SILENCE_DETECTION_WINDOW;
 
                 if (this.silenceLevels.length < detectionWindow) {
                     this.silenceLevels.push(this.getAudioLevel(chunk));
                 } else if (!this.isSilenceLevelAdjusted) {
                     this.sanitizeHighLevelStartingValue();
-                    this.globalSilenceThreshold = this.silenceLevels.reduce((a, b) => a + b, 0) / this.silenceLevels.length * this.config.silenceThresholdMultiplier;
+                    this.silenceThreshold = this.silenceLevels.reduce((a, b) => a + b, 0) / this.silenceLevels.length * this.config.silenceThresholdMultiplier;
                     this.isSilenceLevelAdjusted = true;
-                    console.log('Aufzeichnung läuft.');
+                    this.newSilenceThresholdCallback(this.silenceThreshold);
+                    console.log('Recording audio now.');
                 }
 
                 const isSilent = this.isSilenceLevelAdjusted && this.isSilentChunk(chunk);
@@ -69,7 +70,7 @@ class RecordingHandler {
 
                 if (debug) console.log(
                     'Audio:', this.getAudioLevel(chunk),
-                    'Threshold:', this.globalSilenceThreshold,
+                    'Threshold:', this.silenceThreshold,
                     'isSilent:', isSilent, 'audioInputDetected:',
                     this.audioInputDetected
                 );
@@ -80,8 +81,7 @@ class RecordingHandler {
 
             this.waitTimeout = setTimeout(() => {
                 if (!this.audioInputDetected) {
-                    console.log('No audio input detected. Stopping recording.');
-                    this.reject(new Error('No audio input detected within the time frame.'));
+                    this.chunks = [];
                     this.stopRecording();
                 }
             }, this.config.MAX_WAIT_DURATION);
@@ -109,7 +109,7 @@ class RecordingHandler {
 
     private isSilentChunk(chunk: Buffer): boolean {
         const avg: number = this.getAudioLevel(chunk);
-        return avg <= this.globalSilenceThreshold;
+        return avg <= this.silenceThreshold;
     }
 
     private getAudioLevel(chunk: Buffer): number {
@@ -134,11 +134,7 @@ class RecordingHandler {
         if (!this.isStopped) {
             this.stopRecording();
         }
-        if (this.chunks.length === 0) {
-            this.retryCallback();
-        } else {
-            this.resolve(Buffer.concat(this.chunks));
-        }
+        this.resolve(Buffer.concat(this.chunks));
         this.isStopped = true;
     }
 
@@ -146,28 +142,48 @@ class RecordingHandler {
         if (!this.isStopped) {
             this.stopRecording();
         }
-        this.retryCallback();
     }
 }
 
 export default class Node implements AudioRecorder {
-    private globalSilenceThreshold: number = 0;
+    private silenceThreshold: number = 0;
 
     constructor(
         private config: NodeAudioRecorderConfig
     ) {
     }
 
-    public async startRecording(): Promise<ThrowsErrorOrReturn<Error, Buffer>> {
+    public async startRecording(): Promise<Buffer> {
+        let buffer: Buffer | undefined;
+
+        while (!buffer || buffer.length == 0)
+            buffer = await this.runRecording();
+
+        return buffer;
+    }
+
+    private runRecording() {
         return new Promise<Buffer>((resolve, reject): void => {
             const retryCallback = () => {
-                const handler: RecordingHandler = new RecordingHandler(resolve, reject, this.config, this.globalSilenceThreshold, retryCallback);
-                handler.startRecording().then(() => {
-                    this.globalSilenceThreshold = handler.globalSilenceThreshold;
+                console.log('Checking noise.');
+                const handler: RecordingHandler = new RecordingHandler(
+                    resolve,
+                    reject,
+                    this.config,
+                    this.silenceThreshold,
+                    this.changeSilenceThreshold.bind(this)
+                );
+                handler.startRecording().catch((error) => {
+                    console.error('Recording error:', error);
+                    retryCallback();
                 });
             };
 
             retryCallback();
         });
+    }
+
+    private changeSilenceThreshold(newValue: number): void {
+        this.silenceThreshold = newValue;
     }
 }
