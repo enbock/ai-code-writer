@@ -31,7 +31,7 @@ class GlobalContainer {
         organization: String(process.env.OPENAI_API_ORG || ''),
         apiKey: this.apiKey
     });
-    private useNodeAudioInput: boolean = String(process.env.USE_NODE_AUDIO_INPUT || '') === 'true';
+    private useSoxAudioInput: boolean = String(process.env.USE_SOX_AUDIO_INPUT || '') === 'true';
 
     private conversationStorage: InMemoryConversationStorage = new InMemoryConversationStorage();
     private systemPromptService: SystemPromptServiceDefinedSystemPrompt = new SystemPromptServiceDefinedSystemPrompt();
@@ -56,9 +56,9 @@ class GlobalContainer {
     );
 
     private audioRecorderConfig: NodeAudioRecorderConfig = new NodeAudioRecorderConfig();
-    private audioRecorder: AudioRecorder = this.useNodeAudioInput
-        ? new NodeAudioRecorder(this.audioRecorderConfig)
-        : new SoxRecorder(SoxRecordingFactory)
+    private audioRecorder: AudioRecorder = this.useSoxAudioInput
+        ? new SoxRecorder(SoxRecordingFactory)
+        : new NodeAudioRecorder(this.audioRecorderConfig)
     ;
     private audioPlayer: NodeAudioPlayer = new NodeAudioPlayer();
     private audioUseCase: AudioUseCase = new AudioUseCase(

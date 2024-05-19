@@ -85,3 +85,4 @@ export default class SoxRecorder implements AudioRecorder {
         });
     }
 }
+

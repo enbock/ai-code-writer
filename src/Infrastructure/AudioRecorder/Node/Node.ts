@@ -4,6 +4,8 @@ import {AudioContext} from 'node-web-audio-api';
 import microphone from 'node-microphone';
 import NodeAudioRecorderConfig from './NodeAudioRecorderConfig';
 
+const debug: boolean = false;
+
 class RecordingHandler {
     private chunks: Buffer[] = [];
     private isStopped: boolean = false;
@@ -11,7 +13,6 @@ class RecordingHandler {
     private audioContext: AudioContext = new AudioContext();
     private micInstance: any;
     private silenceDuration: number = 0;
-    public silenceThreshold: number = 0;
     private audioInputDetected: boolean = false;
     private isSilenceLevelAdjusted: boolean = false;
     private waitTimeout?: NodeJS.Timeout;
@@ -21,7 +22,8 @@ class RecordingHandler {
         private resolve: (value: Buffer | PromiseLike<Buffer>) => void,
         private reject: (reason?: any) => void,
         private config: NodeAudioRecorderConfig,
-        public globalSilenceThreshold: number
+        public globalSilenceThreshold: number,
+        private retryCallback: () => void
     ) {
         this.registerEvents();
     }
@@ -39,32 +41,38 @@ class RecordingHandler {
 
                 if (this.isStopped) return;
 
-                if (this.silenceLevels.length < this.config.SILENCE_DETECTION_WINDOW) {
+                const detectionWindow: number = this.globalSilenceThreshold != 0 ? this.config.SILENCE_DETECTION_WINDOW_HALVED : this.config.SILENCE_DETECTION_WINDOW;
+
+                if (this.silenceLevels.length < detectionWindow) {
                     this.silenceLevels.push(this.getAudioLevel(chunk));
                 } else if (!this.isSilenceLevelAdjusted) {
-                    this.silenceThreshold = this.silenceLevels.reduce((a, b) => a + b, 0) / this.silenceLevels.length * this.config.silenceThresholdMultiplier;
-                    this.globalSilenceThreshold = this.globalSilenceThreshold == 0
-                        ? this.silenceThreshold
-                        : (this.globalSilenceThreshold + this.silenceThreshold) / 2
-                    ;
+                    this.sanitizeHighLevelStartingValue();
+                    this.globalSilenceThreshold = this.silenceLevels.reduce((a, b) => a + b, 0) / this.silenceLevels.length * this.config.silenceThresholdMultiplier;
                     this.isSilenceLevelAdjusted = true;
                     console.log('Aufzeichnung läuft.');
                 }
 
-                let isSilent: boolean = true;
-                if (this.isSilenceLevelAdjusted) isSilent = this.isSilentChunk(chunk);
-                if (isSilent) this.silenceDuration += chunk.length / this.audioContext.sampleRate * 1000;
-                else {
+                const isSilent = this.isSilenceLevelAdjusted && this.isSilentChunk(chunk);
+                if (isSilent) {
+                    this.silenceDuration += chunk.length / this.audioContext.sampleRate * 1000;
+                } else {
                     this.silenceDuration = 0;
-                    this.audioInputDetected = true;
-                    clearTimeout(this.waitTimeout);
+                    if (!this.audioInputDetected && this.isSilenceLevelAdjusted) {
+                        this.audioInputDetected = true;
+                        clearTimeout(this.waitTimeout);
+                    }
                 }
 
                 if (this.silenceDuration >= this.config.MAX_SILENCE_DURATION && this.audioInputDetected) {
                     this.stopRecording();
                 }
 
-                // console.log('Audio:', this.getAudioLevel(chunk), 'Silence:', this.silenceThreshold, 'isSilent:', isSilent, 'wasInput:', this.audioInputDetected);
+                if (debug) console.log(
+                    'Audio:', this.getAudioLevel(chunk),
+                    'Threshold:', this.globalSilenceThreshold,
+                    'isSilent:', isSilent, 'audioInputDetected:',
+                    this.audioInputDetected
+                );
             });
 
             micStream.on('end', () => this.streamEnded());
@@ -82,13 +90,31 @@ class RecordingHandler {
         }
     }
 
+    private sanitizeHighLevelStartingValue() {
+        this.silenceLevels.shift();
+    }
+
+    public stopRecording(): void {
+        if (this.isStopped) return;
+        this.isStopped = true;
+        if (this.micInstance) {
+            this.micInstance.stopRecording();
+            this.micInstance = undefined;
+        }
+        if (!this.passThrough.destroyed) {
+            this.passThrough.end();
+        }
+        this.audioContext.close().catch((error: Error) => console.error('Error closing audio context:', error));
+    }
+
     private isSilentChunk(chunk: Buffer): boolean {
         const avg: number = this.getAudioLevel(chunk);
         return avg <= this.globalSilenceThreshold;
     }
 
     private getAudioLevel(chunk: Buffer): number {
-        return Math.round(chunk.reduce((sum, value) => sum + Math.abs(value), 0) / chunk.length);
+        const int16Array = new Int16Array(chunk.buffer, chunk.byteOffset, chunk.byteLength / Int16Array.BYTES_PER_ELEMENT);
+        return Math.sqrt(int16Array.reduce((sum, value) => sum + value * value, 0) / int16Array.length);
     }
 
     private registerEvents(): void {
@@ -108,7 +134,11 @@ class RecordingHandler {
         if (!this.isStopped) {
             this.stopRecording();
         }
-        this.resolve(Buffer.concat(this.chunks));
+        if (this.chunks.length === 0) {
+            this.retryCallback();
+        } else {
+            this.resolve(Buffer.concat(this.chunks));
+        }
         this.isStopped = true;
     }
 
@@ -116,20 +146,7 @@ class RecordingHandler {
         if (!this.isStopped) {
             this.stopRecording();
         }
-        this.reject(error);
-    }
-
-    public stopRecording(): void {
-        if (this.isStopped) return;
-        this.isStopped = true;
-        if (this.micInstance) {
-            this.micInstance.stopRecording();
-            this.micInstance = undefined;
-        }
-        if (!this.passThrough.destroyed) {
-            this.passThrough.end();
-        }
-        this.audioContext.close().catch((error: Error) => console.error('Error closing audio context:', error));
+        this.retryCallback();
     }
 }
 
@@ -143,10 +160,14 @@ export default class Node implements AudioRecorder {
 
     public async startRecording(): Promise<ThrowsErrorOrReturn<Error, Buffer>> {
         return new Promise<Buffer>((resolve, reject): void => {
-            const handler: RecordingHandler = new RecordingHandler(resolve, reject, this.config, this.globalSilenceThreshold);
-            handler.startRecording().then(() => {
-                this.globalSilenceThreshold = handler.globalSilenceThreshold;
-            });
+            const retryCallback = () => {
+                const handler: RecordingHandler = new RecordingHandler(resolve, reject, this.config, this.globalSilenceThreshold, retryCallback);
+                handler.startRecording().then(() => {
+                    this.globalSilenceThreshold = handler.globalSilenceThreshold;
+                });
+            };
+
+            retryCallback();
         });
     }
 }
