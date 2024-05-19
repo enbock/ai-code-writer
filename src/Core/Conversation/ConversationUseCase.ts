@@ -28,7 +28,6 @@ export default class ConversationUseCase {
         this.conversationHistory.push({role: 'system', content: systemPrompt});
         const filesContent = await this.fileCollectorService.collectFiles();
         this.conversationHistory.push({role: 'user', content: filesContent});
-        console.log('>>>', this.conversationHistory);
     }
 
     public async handleConversation(request: ConversationRequest, response: ConversationResponse): Promise<void> {

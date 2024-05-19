@@ -39,7 +39,7 @@ class RecordingHandler {
                     isSilent = this.isSilentChunk(chunk);
                 }
                 if (this.chunks.length <= 3 && this.isSilenceLevelAdjusted == false) {
-                    this.silenceThreshold = this.getSilenceLevel();
+                    this.silenceThreshold = this.getSilenceLevel() * 1.1;
                     this.isSilenceLevelAdjusted = true;
                     console.log('Aufzeichnung läuft.');
                 }
@@ -54,6 +54,8 @@ class RecordingHandler {
                 if (this.silenceDuration >= this.MAX_SILENCE_DURATION && this.audioInputDetected) {
                     this.stopRecording();
                 }
+
+                console.log('Audio:', this.getAudioLevel(chunk), 'Silence:', this.silenceThreshold, 'isSilent:', isSilent);
             });
 
             micStream.on('end', () => this.streamEnded());

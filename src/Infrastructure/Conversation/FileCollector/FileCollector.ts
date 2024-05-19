@@ -29,7 +29,7 @@ export default class FileCollector implements FileCollectorService {
         const files = await this.findFiles(this.sourceDir);
         for (const filePath of files) {
             if (await this.isExcluded(filePath)) continue;
-            console.log('>>>', filePath);
+            console.log('<<<', filePath);
             const fileContent = await fs.readFile(filePath, 'utf8');
             collectedContent += `<<< ${filePath}\n${fileContent}\n\n`;
         }

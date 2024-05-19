@@ -3,7 +3,7 @@ import AudioResponse from './AudioResponse';
 import ConversationUseCase from '../Core/Conversation/ConversationUseCase';
 import ConversationRequest from './ConversationRequest';
 import ConversationResponse from './ConversationResponse';
-import FileActionUseCase from '../Core/Handler/FileActionUseCase';
+import FileActionUseCase from '../Core/FileActions/FileActionUseCase';
 
 export default class StartController {
     constructor(
@@ -17,11 +17,14 @@ export default class StartController {
         await this.gptConversationUseCase.initialize();
         const helloAudio: Buffer = await this.audioUseCase.transformTextToAudio('AI Code Writer ist bereit und hört nun zu.');
         await this.audioUseCase.playAudio(helloAudio);
-// noinspection InfiniteLoopJS
+
+        // noinspection InfiniteLoopJS
         while (true) {
             const response: AudioResponse = new AudioResponse();
+
             await this.audioUseCase.recordAndProcess(response);
             console.log('Transcription:', response.transcription);
+
             if (response.transcription != '') await this.runConversation(response);
         }
     }
@@ -38,7 +41,7 @@ export default class StartController {
             const answerAudio: Buffer = await this.audioUseCase.transformTextToAudio(conversationResponse.comments);
             await this.audioUseCase.playAudio(answerAudio);
         }
-        
+
         if (conversationResponse.actions.length > 0) {
             await this.fileActionUseCase.executeActions(conversationResponse.actions);
         }

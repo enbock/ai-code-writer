@@ -8,11 +8,11 @@ import InMemoryConversationStorage
     from '../Infrastructure/Conversation/ConversationStorage/InMemoryConversationStorage';
 import SystemPromptServiceDefinedSystemPrompt from '../Infrastructure/Conversation/SystemPrompt/DefinedSystemPrompt';
 import FileConversationLogger from '../Infrastructure/Conversation/ConversationLogger/FileConversationLogger';
-import FileSystemActionHandler from '../Infrastructure/Handler/FileSystemActionHandler';
+import FileSystemActionHandler from '../Infrastructure/FileActions/FileSystemActionHandler';
 import GptResponseProcessor from '../Core/Processor/GptResponseProcessor';
 import FileCollectorService from '../Core/Conversation/FileCollectorService';
 import FileCollector from '../Infrastructure/Conversation/FileCollector/FileCollector';
-import FileActionUseCase from '../Core/Handler/FileActionUseCase';
+import FileActionUseCase from '../Core/FileActions/FileActionUseCase';
 import * as dotenv from 'dotenv';
 import {OpenAI} from 'openai';
 import AudioUseCase from '../Core/Audio/AudioUseCase';

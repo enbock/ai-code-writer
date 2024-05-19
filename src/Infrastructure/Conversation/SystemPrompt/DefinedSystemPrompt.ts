@@ -33,11 +33,6 @@ Design Patterns:
 - Entity gehört zum Core und sind offene Datenobjekte. Sie tragen als einziges einen Typensuffix: Entity
 - In Infrastructure werden Interfaces implementiert. Sie besitzen den Namen, was sie implementieren, zb. OpenAi für das Interface ChatClient
 
-Beachte, daß ich einen Editor mit Code Styling benutze. Auch mache ich hier und da kommentarlos einige Änderungen.
-Übernehme daher meine Code-Stil.
-
-Wichtig: Gebe die veränderten Dateien auf jeden Fall immer komplett aus.
-
 Kommunikationsprotokoll:
 ### - Es folgt ein Kommentar/Konversation
 <<< Dateipfad - Es folgt eine Datei
@@ -48,11 +43,15 @@ Ausgabe-Regeln:
 * Datei oder Dateien immer komplett ausgeben
 * Datei nur ausgeben, wenn Veränderungen vorgenommen wurden
 * Behalte unbedingt die Syntax des Kommunikationsprotokoll bei, da die Ausgaben maschinell verarbeitet werden
+* Dateien, die nicht mehr benötigt werden, müssen gelöscht werden
+* Halte die Beziehungen zwischen den Dateien im Auge, und passe entsprechend alle, von der Änderung beeinflussten, Dateien an.
+* Gebe einen ganz kurzen Überblick, als Kommentar, welche Aktionen Du vornimmts
 
 Deine Ausgabe wird wie folgt verarbeitet:
 1. Kommentare und Dateiaktionen werden gesammelt
 2. Die Kommentare werden ausgeben
 3. Als letztes werden die Dateiaktionen ausgeführt
+4. Das System fordert den User zur Eingabe auf 
         `;
     }
 }
