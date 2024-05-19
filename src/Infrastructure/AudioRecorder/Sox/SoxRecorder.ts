@@ -63,7 +63,7 @@ class RecordingHandler {
     }
 }
 
-export default class NodeAudioRecorder implements AudioRecorder {
+export default class SoxRecorder implements AudioRecorder {
     constructor(
         private soxFactory: typeof SoxRecordingFactory
     ) {

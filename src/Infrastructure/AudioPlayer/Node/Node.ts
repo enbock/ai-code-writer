@@ -1,9 +1,9 @@
 import AudioPlayer from '../../../Core/Audio/AudioPlayer';
-import NodeMp3Player from './NodeMp3Player';
+import AudioFilePlayer from './AudioFilePlayer';
 
-export default class NodeAudioPlayer implements AudioPlayer {
+export default class Node implements AudioPlayer {
     public async play(audioBuffer: Buffer): Promise<void> {
-        const player: NodeMp3Player = new NodeMp3Player();
+        const player: AudioFilePlayer = new AudioFilePlayer();
         player.src = audioBuffer;
         await new Promise<void>((resolve) => {
             player.onended = resolve;

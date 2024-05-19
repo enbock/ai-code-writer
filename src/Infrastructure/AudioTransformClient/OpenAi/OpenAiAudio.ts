@@ -19,8 +19,11 @@ export default class OpenAiAudio implements AudioTransformClient {
         try {
             const transcription: Transcription = await this.openAi.audio.transcriptions.create({
                 file: file,
-                model: 'whisper-1'
+                model: 'whisper-1',
+                response_format: 'json',
+                temperature: 1
             });
+            console.log('>>>', transcription);
             return transcription.text;
         } catch (error) {
             throw error;

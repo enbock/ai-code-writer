@@ -2,13 +2,12 @@ import StartController from '../Application/StartController';
 import ConversationChatCompletionClientOpenAiChat
     from '../Infrastructure/Conversation/ChatCompletionClient/OpenAi/OpenAiChat';
 import AudioTransformClientOpenAiAudio from '../Infrastructure/AudioTransformClient/OpenAi/OpenAiAudio';
-import NodeAudioRecorder from '../Infrastructure/AudioRecorder/Node/NodeAudioRecorder';
-import NodeAudioPlayer from '../Infrastructure/AudioPlayer/Node/NodeAudioPlayer';
+import NodeAudioRecorder from '../Infrastructure/AudioRecorder/Node/Node';
+import NodeAudioPlayer from '../Infrastructure/AudioPlayer/Node/Node';
 import * as dotenv from 'dotenv';
 import {OpenAI} from 'openai';
 import AudioUseCase from '../Core/Audio/AudioUseCase';
 import ConversationUseCase from '../Core/Conversation/ConversationUseCase';
-import {SoxRecordingFactory} from '../Infrastructure/AudioRecorder/Node/SoxConnector/Recording';
 
 dotenv.config();
 
@@ -18,21 +17,28 @@ class GlobalContainer {
         organization: String(process.env.OPENAI_API_ORG || ''),
         apiKey: this.apiKey
     });
-
-    private conversationChatCompletionClientOpenAiChat: ConversationChatCompletionClientOpenAiChat = new ConversationChatCompletionClientOpenAiChat(this.openAi);
+    private conversationChatCompletionClientOpenAiChat: ConversationChatCompletionClientOpenAiChat = new ConversationChatCompletionClientOpenAiChat(
+        this.openAi
+    );
     private audioTransformClientOpenAi: AudioTransformClientOpenAiAudio = new AudioTransformClientOpenAiAudio(
         'https://api.openai.com/v1/audio/speech',
         this.apiKey,
         this.openAi
     );
-
-    private audioRecorder: NodeAudioRecorder = new NodeAudioRecorder(SoxRecordingFactory);
+    private audioRecorder: NodeAudioRecorder = new NodeAudioRecorder();
     private audioPlayer: NodeAudioPlayer = new NodeAudioPlayer();
-    private audioUseCase: AudioUseCase = new AudioUseCase(this.audioTransformClientOpenAi, this.audioRecorder, this.audioPlayer);
-
-    private gptConversationUseCase: ConversationUseCase = new ConversationUseCase(this.conversationChatCompletionClientOpenAiChat);
-
-    public startController: StartController = new StartController(this.audioUseCase, this.gptConversationUseCase);
+    private audioUseCase: AudioUseCase = new AudioUseCase(
+        this.audioTransformClientOpenAi,
+        this.audioRecorder,
+        this.audioPlayer
+    );
+    private gptConversationUseCase: ConversationUseCase = new ConversationUseCase(
+        this.conversationChatCompletionClientOpenAiChat
+    );
+    public startController: StartController = new StartController(
+        this.audioUseCase,
+        this.gptConversationUseCase
+    );
 }
 
 const Container: GlobalContainer = new GlobalContainer();

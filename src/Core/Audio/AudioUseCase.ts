@@ -18,7 +18,8 @@ export default class AudioUseCase {
             response.transcription = 'No audio recorded.';
             return;
         }
-
+        console.log(audioBuffer);
+        // await this.playAudio(audioBuffer);
         const transcription: string = await this.audioTransformClient.transformAudioToText(audioBuffer);
 
         response.audio = audioBuffer;

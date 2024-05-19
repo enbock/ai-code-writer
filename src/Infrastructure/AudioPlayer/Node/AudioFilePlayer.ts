@@ -1,6 +1,6 @@
 import {AudioBuffer, AudioBufferSourceNode, AudioContext, GainNode} from 'node-web-audio-api';
 
-class NodeMp3Player {
+export default class AudioFilePlayer {
     private buffer?: Buffer;
     private gainNode: any | typeof GainNode = null;
     private sourceNode: any | typeof AudioBufferSourceNode = null;
@@ -8,16 +8,8 @@ class NodeMp3Player {
 
     private endCallback: () => void = () => <never>false;
 
-    public get onended() {
-        return this.sourceNode.onended;
-    }
-
     public set onended(callback: () => void) {
         this.endCallback = callback;
-    }
-
-    public get src(): Buffer {
-        return this.buffer!;
     }
 
     public set src(buffer: Buffer) {
@@ -44,7 +36,6 @@ class NodeMp3Player {
         source.buffer = audioBuffer;
         source.connect(this.gainNode);
         source.start(this.audioContext.currentTime);
-        // source.stop(this.audioContext.currentTime + audioBuffer.duration);
 
         await new Promise<void>((resolve) => {
             source.onended = (_: Event) => resolve();
@@ -53,6 +44,7 @@ class NodeMp3Player {
         this.endCallback();
     }
 
+    // noinspection JSUnusedGlobalSymbols
     public async stop(): Promise<void> {
         if (!this.sourceNode) return;
 
@@ -90,5 +82,3 @@ class NodeMp3Player {
         });
     }
 }
-
-export default NodeMp3Player;

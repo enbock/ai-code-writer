@@ -10,12 +10,14 @@
   },
   "dependencies": {
     "dotenv": "*",
+    "node-microphone": "*",
+    "node-web-audio-api": "*",
     "openai": "*",
-    "speaker": "*",
-    "node-web-audio-api": "*"
+    "speaker": "*"
   },
   "devDependencies": {
     "@types/node": "*",
+    "@types/node-microphone": "*",
     "typescript": "*"
   }
 }
