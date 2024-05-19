@@ -6,6 +6,13 @@ import NodeAudioRecorder from '../Infrastructure/AudioRecorder/Node/Node';
 import NodeAudioPlayer from '../Infrastructure/AudioPlayer/Node/Node';
 import InMemoryConversationStorage
     from '../Infrastructure/Conversation/ConversationStorage/InMemoryConversationStorage';
+import SystemPromptServiceDefinedSystemPrompt from '../Infrastructure/Conversation/SystemPrompt/DefinedSystemPrompt';
+import FileConversationLogger from '../Infrastructure/Conversation/ConversationLogger/FileConversationLogger';
+import FileSystemActionHandler from '../Infrastructure/Handler/FileSystemActionHandler';
+import GptResponseProcessor from '../Core/Processor/GptResponseProcessor';
+import FileCollectorService from '../Core/Conversation/FileCollectorService';
+import FileCollector from '../Infrastructure/Conversation/FileCollector/FileCollector';
+import FileActionUseCase from '../Core/Handler/FileActionUseCase';
 import * as dotenv from 'dotenv';
 import {OpenAI} from 'openai';
 import AudioUseCase from '../Core/Audio/AudioUseCase';
@@ -21,6 +28,18 @@ class GlobalContainer {
     });
 
     private conversationStorage: InMemoryConversationStorage = new InMemoryConversationStorage();
+    private systemPromptService: SystemPromptServiceDefinedSystemPrompt = new SystemPromptServiceDefinedSystemPrompt();
+    private conversationLogger: FileConversationLogger = new FileConversationLogger('conversation_log.txt');
+    private fileSystemActionHandler: FileSystemActionHandler = new FileSystemActionHandler();
+    private gptResponseProcessor: GptResponseProcessor = new GptResponseProcessor();
+
+    private fileCollectorService: FileCollectorService = new FileCollector(
+        '.',
+        ['*.ts', '*.json', '*.yaml'],
+        ['node_modules', 'build'],
+        ['package-lock.json', '.*']
+    );
+
     private conversationChatCompletionClientOpenAiChat: ConversationChatCompletionClientOpenAiChat = new ConversationChatCompletionClientOpenAiChat(
         this.openAi
     );
@@ -38,11 +57,17 @@ class GlobalContainer {
     );
     private gptConversationUseCase: ConversationUseCase = new ConversationUseCase(
         this.conversationChatCompletionClientOpenAiChat,
-        this.conversationStorage
+        this.conversationStorage,
+        this.conversationLogger,
+        this.systemPromptService,
+        this.gptResponseProcessor,
+        this.fileCollectorService
     );
+    private fileActionUseCase: FileActionUseCase = new FileActionUseCase(this.fileSystemActionHandler);
     public startController: StartController = new StartController(
         this.audioUseCase,
-        this.gptConversationUseCase
+        this.gptConversationUseCase,
+        this.fileActionUseCase
     );
 }
 

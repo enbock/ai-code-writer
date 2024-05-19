@@ -12,10 +12,10 @@ export default class OpenAiChat implements ChatCompletionClient {
         const response: ChatCompletion = await this.openai.chat.completions.create({
             stream: false,
             model: 'gpt-4o',
-            max_tokens: 256,
+            max_tokens: 4095,
             presence_penalty: 0,
             frequency_penalty: 0,
-            temperature: 1,
+            temperature: 0.5,
             top_p: 1,
             messages: messages
         });
