@@ -7,7 +7,7 @@ import NodeAudioPlayer from '../Infrastructure/AudioPlayer/Node/Node';
 import InMemoryConversationStorage
     from '../Infrastructure/Conversation/ConversationStorage/InMemoryConversationStorage';
 import SystemPromptServiceDefinedSystemPrompt from '../Infrastructure/Conversation/SystemPrompt/DefinedSystemPrompt';
-import FileConversationLogger from '../Infrastructure/Conversation/ConversationLogger/FileConversationLogger';
+import NoopConversationLogger from '../Infrastructure/Conversation/ConversationLogger/NoopConversationLogger';
 import FileSystemActionHandler from '../Infrastructure/FileActions/FileSystemActionHandler';
 import GptResponseProcessor from '../Core/Processor/GptResponseProcessor';
 import FileCollectorService from '../Core/Conversation/FileCollectorService';
@@ -32,15 +32,15 @@ class GlobalContainer {
 
     private conversationStorage: InMemoryConversationStorage = new InMemoryConversationStorage();
     private systemPromptService: SystemPromptServiceDefinedSystemPrompt = new SystemPromptServiceDefinedSystemPrompt();
-    private conversationLogger: FileConversationLogger = new FileConversationLogger('conversation_log.txt');
+    private conversationLogger: NoopConversationLogger = new NoopConversationLogger();
     private fileSystemActionHandler: FileSystemActionHandler = new FileSystemActionHandler();
     private gptResponseProcessor: GptResponseProcessor = new GptResponseProcessor();
 
     private fileCollectorService: FileCollectorService = new FileCollector(
         '.',
-        ['*.ts', '*.json', '*.yaml'],
-        ['node_modules', 'build', '.git'],
-        ['package-lock.json', 'conversation_log.txt', '.*']
+        (process.env.INCLUDE_PATTERNS || '*.ts,*.json,*.yaml,*.md').split(','),
+        (process.env.EXCLUDE_DIRS || 'node_modules,build,.git').split(','),
+        (process.env.EXCLUDE_FILES || 'package-lock.json,.*').split(',')
     );
 
     private conversationChatCompletionClientOpenAiChat: ConversationChatCompletionClientOpenAiChat = new ConversationChatCompletionClientOpenAiChat(
@@ -51,7 +51,6 @@ class GlobalContainer {
         this.apiKey,
         this.openAi
     );
-
     private audioRecorderConfig: NodeAudioRecorderConfig = new NodeAudioRecorderConfig();
     private audioRecorder: AudioRecorder = new NodeAudioRecorder(this.audioRecorderConfig);
     private audioPlayer: NodeAudioPlayer = new NodeAudioPlayer();
@@ -71,9 +70,9 @@ class GlobalContainer {
     private fileActionUseCase: FileActionUseCase = new FileActionUseCase(this.fileSystemActionHandler);
     private directoryWatcher: FsDirectoryWatcher = new FsDirectoryWatcher(
         '.',
-        ['*.ts', '*.json', '*.yaml'],
-        ['node_modules', 'build', '.git'],
-        ['package-lock.json', 'conversation_log.txt', '.*']
+        (process.env.INCLUDE_PATTERNS || '*.ts,*.json,*.yaml,*.md').split(','),
+        (process.env.EXCLUDE_DIRS || 'node_modules,build,.git').split(','),
+        (process.env.EXCLUDE_FILES || 'package-lock.json,.*').split(',')
     );
     public startController: StartController = new StartController(
         this.audioUseCase,

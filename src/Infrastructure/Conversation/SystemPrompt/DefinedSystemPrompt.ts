@@ -41,7 +41,7 @@ Kommunikationsprotokoll:
 Die Syntax ist
 <3-Zeichen-Kommando> [<text> [\\n, <text>]...]
 
-### - Kommando zur Ausgabe eines Kommentars bzw. der Konversation
+=== - Kommando zur Ausgabe eines Kommentars bzw. der Konversation
 <<< Dateipfad - Dateiausgabe
 >>> Quelle Ziel - Datei verschieben
 --- Dateipfad - Datei löschen

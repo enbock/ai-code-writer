@@ -1,88 +1,61 @@
 # AI Code Writer
 
-## Übersicht
+## Description
 
-Dies ist ein AI-basierter Code Writer, der Audio-Input empfängt, in Text umwandelt und basierend auf der Transkription
-eine Konversation mit der OpenAI GPT-API führt. Anschließend wird die Antwort wieder in Audio umgewandelt und
-abgespielt.
+An AI code writer application using OpenAI APIs for audio transcription and chat completion.
 
-## Voraussetzungen
+## Important Notice
 
-- Node.js (>= 20)
-- Sox (falls nicht vorhanden: https://sox.sourceforge.net)
+When running this application, the files and directories in the current working directory will be sent to OpenAI for processing. See more in the filters section to know which files are involved.
 
-## Installation von SoX, Node.js und npm
+## Filters
 
-Unter Debian-basierten Systemen (wie Ubuntu):
+The application uses the following filters for file collection and monitoring, which can be configured via environment variables:
+- **Include Patterns**: `INCLUDE_PATTERNS` (default: `*.ts,*.json,*.yaml,*.md`)
+- **Exclude Directories**: `EXCLUDE_DIRS` (default: `node_modules,build,.git`)
+- **Exclude Files**: `EXCLUDE_FILES` (default: `package-lock.json,.*`)
 
-```sh
-sudo apt-get update
-sudo apt-get install sox
-sudo apt-get install nodejs
-sudo apt-get install npm
-```
-
-Unter MacOS (unter Verwendung von Homebrew):
+## Usage
 
 ```sh
-brew install sox
-brew install node
+npx ai-code-writer
 ```
 
-Unter Windows:
+### User Guide
 
-1. Laden Sie SoX von [https://sox.sourceforge.net](https://sox.sourceforge.net) herunter und installieren Sie es.
-2. Laden Sie Node.js von [https://nodejs.org](https://nodejs.org) herunter und installieren Sie es. Dies wird auch npm
-   installieren.
+1. **Starting the Application**:
+    - Ensure that the environment variable `OPENAI_API_KEY` is set.
+    - Optionally, set the filter environment variables (`INCLUDE_PATTERNS`, `EXCLUDE_DIRS`, `EXCLUDE_FILES`).
+    - Start the application with the command `npx ai-code-writer`.
 
-## Installation
+2. **Interaction**:
+    - After starting the application, a welcome message will be played: "The AI Code Writer is ready."
+    - Speak your input into the microphone. The application will record your speech and convert it to text.
 
-1. Abhängigkeiten installieren:
-    ```sh
-    npm install
-    ```
-2. Environment-Datei einrichten:
-   Erstellen Sie eine Datei `.env` im Wurzelverzeichnis und fügen Sie Ihre OpenAI-API-Schlüssel hinzu:
+3. **Conversation**:
+    - The transcribed input will be sent to the OpenAI API to get a response.
+    - The AI's response will be read out loud and displayed on the console.
+    - If the response contains file tasks (e.g., create, move, delete files), these will be executed automatically.
 
-    ```
-    OPENAI_API_KEY=your_openai_api_key
-    OPENAI_API_ORG=your_openai_organization_id
-    ```
+4. **File Monitoring**:
+    - Changes to the monitored files will be detected and recorded in the conversation history.
+    - These changes can influence the AI's responses.
 
-## Verwendung
+5. **Ending the Application**:
+    - The application runs in an infinite loop waiting for user input.
+    - To end the application, use the usual methods to stop a Node.js process (e.g., `Ctrl+C` in the console).
 
-Das Projekt kann im Entwicklungsmodus gestartet werden:
+## License
 
-```sh
-npm run dev
-```
+MIT - [LICENSE](./LICENSE)
 
-Oder als build version:
+## Author
 
-```sh
-npm start
-```
+Endre Bock <dev@itbock.de>
 
-## Projektstruktur
+## Languages
 
-- `src/Application`: Enthält die Controller und Anfragedefinitionen, die als Schnittstelle zur Benutzerinteraktion
-  dienen.
-- `src/Core`: Enthält die Anwendungsfälle (UseCases), Services und Interfaces, welche die Geschäftslogik der Anwendung
-  implementieren.
-- `src/Infrastructure`: Enthält die Implementierungen der in Core definierten Interfaces und Anbindungen an externe
-  Bibliotheken und SDKs.
-- `src/index.ts`: Einstiegspunkt der Anwendung.
-
-## Architektur
-
-Das Projekt folgt dem Prinzip der Clean Architecture, was bedeutet, dass:
-
-- Die Geschäftslogik und Anwendungsfälle (Use Cases) im Core-Modul definiert sind.
-- Die Infrastruktur-Schicht Implementierungen für Schnittstellen im Core bereitstellt und die Interaktion mit externen
-  Diensten und Bibliotheken abwickelt.
-- Die Anwendungsschicht Controller und Request-Klassen enthält, die als Bindeglied zwischen der Benutzerinteraktion und
-  der Geschäftslogik dienen.
-
-## Lizenz
-
-Dieses Projekt steht unter der MIT Lizenz. Details finden Sie in der LICENSE Datei.
+- [Auf Deutsch lesen](./README_de.md)
+- [Leer en español](./README_es.md)
+- [阅读中文](./README_zh.md)
+- [Lire en français](./README_fr.md)

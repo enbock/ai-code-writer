@@ -1,0 +1,10 @@
+*
+!README.md
+!LICENSE
+!package.json
+!/*.d.ts
+!/*.js
+!/build/**/*
+babel.config.js
+.env
+.env.dist

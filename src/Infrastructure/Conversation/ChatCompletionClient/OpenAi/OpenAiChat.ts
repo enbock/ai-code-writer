@@ -15,7 +15,7 @@ export default class OpenAiChat implements ChatCompletionClient {
             max_tokens: 4095,
             presence_penalty: 0,
             frequency_penalty: 0,
-            temperature: 0.5,
+            temperature: 1,
             top_p: 1,
             messages: messages
         });

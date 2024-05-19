@@ -23,7 +23,7 @@ export default class StartController {
         this.directoryWatcher.startWatching();
         await this.audioUseCase.measureNoiseLevel();
         const helloAudio: Buffer = await this.audioUseCase.transformTextToAudio('Der K.I. Code Writer ist bereit.');
-        console.log('Der K.I. Code Writer ist bereit.');
+        console.log('Der KI Code Writer ist bereit.');
         await this.audioUseCase.playAudio(helloAudio);
 
         // noinspection InfiniteLoopJS
@@ -40,7 +40,6 @@ export default class StartController {
     private async runConversation(response: AudioResponse): Promise<void> {
         const conversationRequest: ConversationRequest = new ConversationRequest();
         conversationRequest.transcription = response.transcription;
-
 
         console.log('Starte KI Anfrage');
         const conversationResponse = new ConversationResponse();

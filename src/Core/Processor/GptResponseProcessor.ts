@@ -6,7 +6,7 @@ export default class GptResponseProcessor {
         let actions: Array<string> = [];
 
         for (const line of lines) {
-            if (line.startsWith('###') || line.startsWith('<<<') || line.startsWith('>>>') || line.startsWith('---')) {
+            if (line.startsWith('===') || line.startsWith('<<<') || line.startsWith('>>>') || line.startsWith('---')) {
                 if (currentSection.length > 0) {
                     const {
                         comments: sectionComments,
@@ -32,8 +32,8 @@ export default class GptResponseProcessor {
     private async processSection(section: Array<string>): Promise<{ comments: string[], actions: string[] }> {
         const command: string = section.shift()!;
 
-        if (command.startsWith('###')) {
-            return {comments: [command.replace(/^### /, '') + section.join('\n')], actions: []};
+        if (command.startsWith('===')) {
+            return {comments: [command.replace(/^=== /, '') + section.join('\n')], actions: []};
         } else if (command.startsWith('<<<')) {
             const filePath: string = command.slice(3).trim();
             const content: string = section.join('\n');
