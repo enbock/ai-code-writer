@@ -4,8 +4,6 @@ import * as path from 'path';
 
 export default class FsDirectoryWatcher implements DirectoryWatcher {
     private watchers: Array<fs.FSWatcher> = [];
-    private callback: (action: string, fileName: string) => void = () => {
-    };
     private watching: boolean = true;
 
     constructor(
@@ -36,6 +34,9 @@ export default class FsDirectoryWatcher implements DirectoryWatcher {
     public onChange(callback: (action: string, fileName: string) => void): void {
         this.callback = callback;
     }
+
+    private callback: (action: string, fileName: string) => void = () => {
+    };
 
     private async isExcluded(filePath: string): Promise<boolean> {
         for (const excludeDir of this.excludeDirs) {
@@ -68,19 +69,20 @@ export default class FsDirectoryWatcher implements DirectoryWatcher {
         const watcher = fs.watch(directory, {recursive: true}, async (eventType, filename) => {
             if (!this.watching || !filename) return;
             const filePath = path.resolve(directory, filename);
-
+            const relativeFilePath = path.relative(process.cwd(), filePath);
+ 
             if (await this.isExcluded(filePath) || !(await this.isIncluded(filePath))) return;
 
             if (eventType === 'rename') {
                 fs.stat(filePath, (err, stats) => {
                     if (err) {
-                        this.callback(`--- ${filePath}`, filePath);
+                        this.callback(`--- ${relativeFilePath}`, relativeFilePath);
                     } else if (stats.isFile()) {
-                        this.callback(`<<< ${filePath}\n${fs.readFileSync(filePath, 'utf8')}`, filePath);
+                        this.callback(`<<< ${relativeFilePath}\n${fs.readFileSync(filePath, 'utf8')}`, relativeFilePath);
                     }
                 });
             } else if (eventType === 'change') {
-                this.callback(`<<< ${filePath}\n${fs.readFileSync(filePath, 'utf8')}`, filePath);
+                this.callback(`<<< ${relativeFilePath}\n${fs.readFileSync(filePath, 'utf8')}`, relativeFilePath);
             }
         });
 
