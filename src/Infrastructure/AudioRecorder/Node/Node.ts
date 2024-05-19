@@ -84,7 +84,6 @@ class RecordingHandler {
 
     private isSilentChunk(chunk: Buffer): boolean {
         const avg: number = this.getAudioLevel(chunk);
-        console.log('>>>>', avg, this.globalSilenceThreshold);
         return avg <= this.globalSilenceThreshold;
     }
 

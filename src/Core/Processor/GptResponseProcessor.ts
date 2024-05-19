@@ -25,7 +25,7 @@ export default class GptResponseProcessor {
             comments.push(...sectionComments);
             actions.push(...sectionActions);
         }
-        console.log('???>>>>', comments, actions, currentSection, lines);
+
         return {comments: comments, actions: actions};
     }
 

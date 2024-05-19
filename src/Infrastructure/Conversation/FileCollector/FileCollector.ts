@@ -1,5 +1,5 @@
 import FileCollectorService from '../../../Core/Conversation/FileCollectorService';
-import * as fs from 'fs/promises';
+import * as fs from 'fs';
 import * as path from 'path';
 
 export default class FileCollector implements FileCollectorService {
@@ -24,13 +24,13 @@ export default class FileCollector implements FileCollectorService {
     }
 
     public async collectFiles(): Promise<string> {
-        let collectedContent = '';
+        let collectedContent: string = '';
 
-        const files = await this.findFiles(this.sourceDir);
+        const files: Array<string> = await this.findFiles(this.sourceDir);
         for (const filePath of files) {
             if (await this.isExcluded(filePath)) continue;
             console.log('<<<', filePath);
-            const fileContent = await fs.readFile(filePath, 'utf8');
+            const fileContent: string = await this.readFileStream(filePath);
             collectedContent += `<<< ${filePath}\n${fileContent}\n\n`;
         }
 
@@ -38,11 +38,11 @@ export default class FileCollector implements FileCollectorService {
     }
 
     private async findFiles(dir: string): Promise<Array<string>> {
-        const entries = await fs.readdir(dir, {withFileTypes: true});
+        const entries: Array<fs.Dirent> = await fs.promises.readdir(dir, {withFileTypes: true});
         const files: Array<string> = [];
 
         for (const entry of entries) {
-            const fullPath = path.resolve(dir, entry.name);
+            const fullPath: string = path.resolve(dir, entry.name);
             if (entry.isDirectory()) {
                 files.push(...await this.findFiles(fullPath));
             } else {
@@ -59,10 +59,29 @@ export default class FileCollector implements FileCollectorService {
     }
 
     private matchPattern(fileName: string, pattern: string): boolean {
-        const regexPattern = pattern
+        const regexPattern: string = pattern
             .replace(/\./g, '\\.')
             .replace(/\*/g, '.*');
-        const regex = new RegExp(`^${regexPattern}$`);
+        const regex: RegExp = new RegExp(`^${regexPattern}$`);
         return regex.test(fileName);
+    }
+
+    private async readFileStream(filePath: string): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            let content: string = '';
+            const stream: fs.ReadStream = fs.createReadStream(filePath, {encoding: 'utf8'});
+
+            stream.on('data', (chunk: string) => {
+                content += chunk;
+            });
+
+            stream.on('end', () => {
+                resolve(content);
+            });
+
+            stream.on('error', (error: Error) => {
+                reject(error);
+            });
+        });
     }
 }
