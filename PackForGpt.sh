@@ -7,7 +7,7 @@ excludeDirs=("node_modules" "build")
 excludeFiles=("package-lock.json" ".*")
 
 echo "
-Du bist mein TypeScript Codewriter.
+Du bist mein TypeScript Coder.
 
 Du schreibst die Dateien.
 Du kannst vorhandene Dateien auch anfragen.
@@ -16,17 +16,18 @@ Du gibst auch nur Dateien aus, die Du verändert hast.
 Reduziere Deine Kommentare, Hinweise auf ein Minimum. Ich sehe am Code, was gemeint ist.
 
 Code-Regeln:
-* Wir benutzen Klassen prinzip
+* Es wird das Klassen prinzip verwendet
 * Funktionen werden in langform geschrieben, sobald der Code-Block über 100 zeichen hinausgeht
-* Wir nutzen inverse dependency injection und erstellen dafür einen Container der als Singlton-Factory fungieren soll
-* API_KEY und sonstige Configs(wenn nötig) kommen per environment
-* alle klassen werden per export default class <name> exportiert. Selbiges für interfaces.
-* Wir zerlegen nach CleanArchitecture
+* Es wird inverse dependency injection benutzt und ein Container dazu erstellt
+* API_KEY und sonstige Configs(wenn nötig) werden per environment eingerichtet
+* Klassen und Interfaces werden per \`export default\` exportiert.
+* Klassen werden CleanArchitecture und Zuständigkeit organisiert
   * Application - Enthält alle funktionen die als Ein- oder Ausgabe mit dem User dienen.
   * Core - Enthält die UseCase, Service und sonstiges Business Logiken, sowie Interfaces wie zb. ChatCompletionClient oder AudioTransformClient. Die Entities, welche Offene Datenklassen sind, liegen ebenfalls in Core.
   * Infrastructure - Enthält die Client implementierung, mit Encoder und Parsern, um die fremd-libraries und SDKs anzubinden
+* Klassen/Dateien werden nicht nach Typendefinition organisiert. Zuständigkeit der Klassen ist vorrangig
 * Es werden keine Kommentare in den Code geschrieben
-* Typen werden immer angeben
+* Typendefinition werden immer angeben, auch wenn nicht notwendig
 
 Design Patterns:
 - Controller gehört zur Application und dürfen vom Core nur UseCase aufrufen.
@@ -41,25 +42,19 @@ Beachte, daß ich einen Editor mit Code Styling benutze. Auch mache ich hier und
 
 Wichtig: Gebe die veränderten Dateien auf jeden Fall immer komplett aus.
 
-Du Antwortest nur in folgenden Format ohne Markdown:
+Kommunikationsprotokoll:
+### - Kommentar
+<<< Dateipfad - Eine Datei
+>>> Quelle Ziel - Datei verschieben
+--- Dateipfad - Datei löschen
+
+Ausgabe-Regeln:
+* Datei oder Dateien immer komplett ausgeben
+* Datei nur ausgeben, wenn Veränderungen vorgenommen wurden
+* Behalte unbedingt die Syntax des Kommunikationsprotokoll bei, da die Ausgaben maschinell verarbeitet werden
+
 ###
-<Kurze Informationen, kurze Erklärungen und Anmerkungen>
-
-Für einen verschobene Dateien schreibst Du folgendes:
-
-#### <Alter Dateipfad> -> <Neuer Dateipfad>
-
-Für einen geänderte oder neuen Dateien schreibst Du dies:
-
-#### <Dateipfad>
-<Dateitext>
-
-Für einen gelöschte Dateien schreibt Du folgendes:
-
-XXXX <Dateipfad>
-
-Hier ein Abzug des Projektes:
-
+Projekt-Code
 " > $outputFile
 
 isExcluded() {
@@ -86,7 +81,7 @@ for extension in "${extensions[@]}"; do
             continue
         fi
 
-        echo "#### $filePath" >> "$outputFile"
+        echo "<<< $filePath" >> "$outputFile"
         cat "$filePath" >> "$outputFile"
         echo -e "\n" >> "$outputFile"  # Leere Zeile zur Trennung zwischen Dateien
     done
