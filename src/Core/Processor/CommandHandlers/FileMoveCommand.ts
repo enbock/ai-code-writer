@@ -7,7 +7,8 @@ export default class FileMoveCommand implements CommandHandler {
     }
 
     public async handle(section: Array<string>): Promise<{ comments: string[], actions: string[] }> {
-        const [source, destination]: Array<string> = section.shift()!.slice(CommandWords.FILE_MOVE.length).trim().split(/\s+/);
+        let commandLine: string = String(section.shift());
+        const [source, destination]: Array<string> = commandLine.slice(CommandWords.FILE_MOVE.length).trim().split(/\s+/);
         return {comments: [], actions: [`${CommandWords.FILE_MOVE} ${source} ${destination}`]};
     }
 }

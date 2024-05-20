@@ -25,6 +25,7 @@ import FileWriteCommand from '../Core/Processor/CommandHandlers/FileWriteCommand
 import FileMoveCommand from '../Core/Processor/CommandHandlers/FileMoveCommand';
 import FileDeleteCommand from '../Core/Processor/CommandHandlers/FileDeleteCommand';
 import Config from './Config';
+import Logger from '../Infrastructure/Logger/Logger';
 
 class GlobalContainer {
     private config: Config = new Config();
@@ -36,22 +37,25 @@ class GlobalContainer {
     private conversationStorage: InMemoryConversationStorage = new InMemoryConversationStorage();
     private systemPromptService: SystemPromptServiceDefinedSystemPrompt = new SystemPromptServiceDefinedSystemPrompt();
     private conversationLogger: NoopConversationLogger = new NoopConversationLogger();
-    private fileSystemActionHandler: FileSystemActionHandler = new FileSystemActionHandler();
+    private fileSystemActionHandler: FileSystemActionHandler = new FileSystemActionHandler(new Logger());
     private fileCollectorService: FileCollectorService = new FileCollector(
         '.',
         this.config.includePatterns,
         this.config.excludeDirs,
         this.config.excludeFiles
     );
+    private logger: Logger = new Logger();
     private conversationChatCompletionClientOpenAiChat: ConversationChatCompletionClientOpenAiChat = new ConversationChatCompletionClientOpenAiChat(
         this.openAi,
-        this.config.openAiChatTemperature
+        this.config.openAiChatTemperature,
+        this.logger
     );
     private audioTransformClientOpenAi: AudioTransformClientOpenAiAudio = new AudioTransformClientOpenAiAudio(
         'https://api.openai.com/v1/audio/speech',
         this.config.apiKey,
         this.openAi,
-        this.config.openAiAudioTemperature
+        this.config.openAiAudioTemperature,
+        this.logger
     );
     private audioRecorderConfig: NodeAudioRecorderConfig = new NodeAudioRecorderConfig();
     private audioRecorder: AudioRecorder = new NodeAudioRecorder(this.audioRecorderConfig);
