@@ -14,8 +14,8 @@ OpenAI gesendet. Siehe mehr bei den Filtern, welche Dateien involviert werden.
 Die Anwendung verwendet die folgenden Filter für die Dateisammlung und -überwachung, die über Umgebungsvariablen
 konfiguriert werden können:
 
-- **Einschlussmuster**: `INCLUDE_PATTERNS` (Standard: `*.ts,*.json,*.yaml,*.md,.env.dist`)
-- **Auszuschließende Verzeichnisse**: `EXCLUDE_DIRS` (Standard: `node_modules,build,.git`)
+- **Einschlussmuster**: `INCLUDE_PATTERNS` (Standard: `*.ts,*.json,*.yml,*.yaml,*.md,*.js,.env.dist`)
+- **Auszuschließende Verzeichnisse**: `EXCLUDE_DIRS` (Standard: `node_modules,build,dist,.git`)
 - **Auszuschließende Dateien**: `EXCLUDE_FILES` (Standard: `package-lock.json,.*`)
 
 ## Optionale Umgebungsvariablen
@@ -26,9 +26,9 @@ Zusätzlich zur obligatorischen Variable `OPENAI_API_KEY` unterstützt die Anwen
 - **OPENAI_AUDIO_TEMPERATURE**: Die Temperatureinstellung für Audio-Transformationen (Standard: `0.1`).
 - **OPENAI_CHAT_TEMPERATURE**: Die Temperatureinstellung für Chat-Vervollständigungen (Standard: `0.75`).
 - **INCLUDE_PATTERNS**: Muster für Dateien, die in die Verarbeitung einbezogen werden sollen (
-  Standard: `*.ts,*.json,*.yaml,*.md,.env.dist`).
+  Standard: `*.ts,*.json,*.yml,*.yaml,*.md,*.js,.env.dist`).
 - **EXCLUDE_DIRS**: Verzeichnisse, die von der Verarbeitung ausgeschlossen werden sollen (
-  Standard: `node_modules,build,.git`).
+  Standard: `node_modules,build,dist,.git`).
 - **EXCLUDE_FILES**: Dateien, die von der Verarbeitung ausgeschlossen werden sollen (Standard: `package-lock.json,.*`).
 
 ## Verwendung

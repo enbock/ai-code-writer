@@ -14,8 +14,8 @@ envoyés à OpenAI pour traitement. Voir plus dans la section des filtres pour s
 L'application utilise les filtres suivants pour la collecte et la surveillance des fichiers, qui peuvent être configurés
 via des variables d'environnement :
 
-- **Modèles d'inclusion** : `INCLUDE_PATTERNS` (par défaut : `*.ts,*.json,*.yaml,*.md,.env.dist`)
-- **Répertoires exclus** : `EXCLUDE_DIRS` (par défaut : `node_modules,build,.git`)
+- **Modèles d'inclusion** : `INCLUDE_PATTERNS` (par défaut : `*.ts,*.json,*.yml,*.yaml,*.md,*.js,.env.dist`)
+- **Répertoires exclus** : `EXCLUDE_DIRS` (par défaut : `node_modules,build,dist,.git`)
 - **Fichiers exclus** : `EXCLUDE_FILES` (par défaut : `package-lock.json,.*`)
 
 ## Variables d'environnement optionnelles
@@ -27,8 +27,8 @@ optionnelles :
 - **OPENAI_AUDIO_TEMPERATURE** : Réglage de la température pour les transformations audio (par défaut : `0.1`).
 - **OPENAI_CHAT_TEMPERATURE** : Réglage de la température pour les complétions de chat (par défaut : `0.75`).
 - **INCLUDE_PATTERNS** : Modèles pour les fichiers à inclure dans le traitement (par
-  défaut : `*.ts,*.json,*.yaml,*.md,.env.dist`).
-- **EXCLUDE_DIRS** : Répertoires à exclure du traitement (par défaut : `node_modules,build,.git`).
+  défaut : `*.ts,*.json,*.yml,*.yaml,*.md,*.js,.env.dist`).
+- **EXCLUDE_DIRS** : Répertoires à exclure du traitement (par défaut : `node_modules,build,dist,.git`).
 - **EXCLUDE_FILES** : Fichiers à exclure du traitement (par défaut : `package-lock.json,.*`).
 
 ## Utilisation

@@ -14,8 +14,8 @@ processing. See more in the filters section to know which files are involved.
 The application uses the following filters for file collection and monitoring, which can be configured via environment
 variables:
 
-- **Include Patterns**: `INCLUDE_PATTERNS` (default: `*.ts,*.json,*.yaml,*.md,.env.dist`)
-- **Exclude Directories**: `EXCLUDE_DIRS` (default: `node_modules,build,.git`)
+- **Include Patterns**: `INCLUDE_PATTERNS` (default: `*.ts,*.json,*.yml,*.yaml,*.md,*.js,.env.dist`)
+- **Exclude Directories**: `EXCLUDE_DIRS` (default: `node_modules,build,dist,.git`)
 - **Exclude Files**: `EXCLUDE_FILES` (default: `package-lock.json,.*`)
 
 ## Optional Environment Variables
@@ -25,8 +25,9 @@ In addition to the mandatory `OPENAI_API_KEY`, the application supports several 
 - **OPENAI_API_ORG**: Your OpenAI organization ID (if applicable).
 - **OPENAI_AUDIO_TEMPERATURE**: The temperature setting for audio transformations (default: `0.1`).
 - **OPENAI_CHAT_TEMPERATURE**: The temperature setting for chat completions (default: `0.75`).
-- **INCLUDE_PATTERNS**: Patterns for files to include in processing (default: `*.ts,*.json,*.yaml,*.md,.env.dist`).
-- **EXCLUDE_DIRS**: Directories to exclude from processing (default: `node_modules,build,.git`).
+- **INCLUDE_PATTERNS**: Patterns for files to include in processing (
+  default: `*.ts,*.json,*.yml,*.yaml,*.md,*.js,.env.dist`).
+- **EXCLUDE_DIRS**: Directories to exclude from processing (default: `node_modules,build,dist,.git`).
 - **EXCLUDE_FILES**: Files to exclude from processing (default: `package-lock.json,.*`).
 
 ## Usage
