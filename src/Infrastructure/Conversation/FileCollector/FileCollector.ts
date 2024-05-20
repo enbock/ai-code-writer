@@ -11,18 +11,6 @@ export default class FileCollector implements FileCollectorService {
     ) {
     }
 
-    private async isExcluded(filePath: string): Promise<boolean> {
-        for (const excludeDir of this.excludeDirs) {
-            if (filePath.includes(path.sep + excludeDir + path.sep)) return true;
-        }
-
-        for (const excludeFile of this.excludeFiles) {
-            if (filePath.endsWith(excludeFile)) return true;
-        }
-
-        return false;
-    }
-
     public async collectFiles(): Promise<string> {
         let collectedContent: string = '';
 
@@ -36,6 +24,18 @@ export default class FileCollector implements FileCollectorService {
         }
 
         return collectedContent;
+    }
+
+    private async isExcluded(filePath: string): Promise<boolean> {
+        for (const excludeDir of this.excludeDirs) {
+            if (filePath.includes(path.sep + excludeDir + path.sep)) return true;
+        }
+
+        for (const excludeFile of this.excludeFiles) {
+            if (filePath.endsWith(excludeFile)) return true;
+        }
+
+        return false;
     }
 
     private async findFiles(dir: string): Promise<Array<string>> {

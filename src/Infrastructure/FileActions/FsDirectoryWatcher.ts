@@ -70,7 +70,7 @@ export default class FsDirectoryWatcher implements DirectoryWatcher {
             if (!this.watching || !filename) return;
             const filePath = path.resolve(directory, filename);
             const relativeFilePath = path.relative(process.cwd(), filePath);
- 
+
             if (await this.isExcluded(filePath) || !(await this.isIncluded(filePath))) return;
 
             if (eventType === 'rename') {

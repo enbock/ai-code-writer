@@ -55,6 +55,14 @@ export default class ConversationUseCase {
         response.actions = actions;
     }
 
+    public async addToConversationHistory(request: AddToConversationHistoryRequest): Promise<void> {
+        const changedFiles: Map<string, string> = await this.conversationStorage.loadFileContent();
+
+        changedFiles.set(request.fileName, request.transcription);
+
+        await this.conversationStorage.saveFileContent(changedFiles);
+    }
+
     private async addModifiedFilesToConversation(conversationHistory: Array<ChatCompletionMessageParam>): Promise<void> {
         const map: Map<string, string> = await this.conversationStorage.loadFileContent();
 
@@ -63,13 +71,5 @@ export default class ConversationUseCase {
         }
 
         await this.conversationStorage.saveFileContent(new Map());
-    }
-
-    public async addToConversationHistory(request: AddToConversationHistoryRequest): Promise<void> {
-        const changedFiles: Map<string, string> = await this.conversationStorage.loadFileContent();
-
-        changedFiles.set(request.fileName, request.transcription);
-
-        await this.conversationStorage.saveFileContent(changedFiles);
     }
 }

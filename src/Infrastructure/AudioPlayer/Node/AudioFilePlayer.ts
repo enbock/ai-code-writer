@@ -7,8 +7,6 @@ export default class AudioFilePlayer {
     private sourceNode: any | typeof AudioBufferSourceNode = null;
     private audioContext: AudioContext = new AudioContext();
 
-    private endCallback: () => void = () => <never>false;
-
     public set onended(callback: () => void) {
         this.endCallback = callback;
     }
@@ -63,6 +61,8 @@ export default class AudioFilePlayer {
         this.sourceNode.stop(this.audioContext.currentTime);
         await this.cleanAudio();
     }
+
+    private endCallback: () => void = () => <never>false;
 
     private async cleanAudio(): Promise<void> {
         if (this.sourceNode) this.sourceNode.disconnect();
