@@ -29,9 +29,10 @@ export default class FileCollector implements FileCollectorService {
         const files: Array<string> = await this.findFiles(this.sourceDir);
         for (const filePath of files) {
             if (await this.isExcluded(filePath)) continue;
-            console.log('<<<', filePath);
+            const relativeFilePath: string = path.relative(process.cwd(), filePath);
+            console.log('<<<', relativeFilePath);
             const fileContent: string = await this.readFileStream(filePath);
-            collectedContent += `<<< ${filePath}\n${fileContent}\n\n`;
+            collectedContent += `<<< ${relativeFilePath}\n${fileContent}\n\n`;
         }
 
         return collectedContent;

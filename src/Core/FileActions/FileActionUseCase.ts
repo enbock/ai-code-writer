@@ -1,5 +1,7 @@
 import FileSystemHandler from './FileSystemHandler';
 import FileActionRequest from './FileActionRequest';
+import FileActionEntity from '../Entities/FileActionEntity';
+import CommandWords from '../Processor/CommandWords';
 
 export default class FileActionUseCase {
     constructor(
@@ -13,22 +15,13 @@ export default class FileActionUseCase {
         }
     }
 
-    private async processAction(action: string): Promise<void> {
-        const lines: Array<string> = action.split('\n');
-        const command: string | undefined = lines.shift();
-
-        if (!command) return;
-
-        if (command.startsWith('<<<')) {
-            const filePath: string = command.slice(3).trim();
-            const content: string = lines.join('\n');
-            await this.fileSystemHandler.handleWriteFile(filePath, content);
-        } else if (command.startsWith('>>>')) {
-            const [source, destination]: Array<string> = command.slice(3).trim().split(/\s+/);
-            await this.fileSystemHandler.handleMoveFile(source, destination);
-        } else if (command.startsWith('---')) {
-            const filePath: string = command.slice(3).trim();
-            await this.fileSystemHandler.handleDeleteFile(filePath);
+    private async processAction(action: FileActionEntity): Promise<void> {
+        if (action.actionType === CommandWords.FILE_WRITE) {
+            await this.fileSystemHandler.handleWriteFile(action.filePath, action.content);
+        } else if (action.actionType === CommandWords.FILE_MOVE) {
+            await this.fileSystemHandler.handleMoveFile(action.filePath, action.targetFilePath);
+        } else if (action.actionType === CommandWords.FILE_DELETE) {
+            await this.fileSystemHandler.handleDeleteFile(action.filePath);
         }
     }
 }

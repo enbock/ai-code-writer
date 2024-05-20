@@ -1,5 +1,6 @@
 import CommandWords from './CommandWords';
 import CommandHandler from './CommandHandlers/CommandHandler';
+import FileActionEntity from '../Entities/FileActionEntity';
 
 export default class GptResponseProcessor {
     constructor(
@@ -7,12 +8,12 @@ export default class GptResponseProcessor {
     ) {
     }
 
-    public async processResponse(response: string): Promise<{ comments: string[], actions: string[] }> {
+    public async processResponse(response: string): Promise<{ comments: string[], actions: FileActionEntity[] }> {
         const correctedResponse: string = this.ensureInitialCommandWord(response);
         const lines: Array<string> = correctedResponse.split('\n');
         let currentSection: Array<string> = [];
         let comments: Array<string> = [];
-        let actions: Array<string> = [];
+        let actions: Array<FileActionEntity> = [];
 
         for (const line of lines) {
             if (this.isCommand(line)) {
@@ -38,7 +39,7 @@ export default class GptResponseProcessor {
         return {comments: comments, actions: actions};
     }
 
-    private async processSection(section: Array<string>): Promise<{ comments: string[], actions: string[] }> {
+    private async processSection(section: Array<string>): Promise<{ comments: string[], actions: FileActionEntity[] }> {
         const command: string = this.removePrefix(section[0]);
 
         for (const handler of this.commandHandlers) {

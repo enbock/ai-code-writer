@@ -1,3 +1,6 @@
+import FileActionEntity from '../Entities/FileActionEntity';
+
 export default interface FileActionRequest {
-    actions: Array<string>;
+    actions: Array<FileActionEntity>;
 }
+

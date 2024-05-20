@@ -7,6 +7,7 @@ import FileActionUseCase from '../Core/FileActions/FileActionUseCase';
 import FileActionRequest from './FileActionRequest';
 import DirectoryWatcher from '../Core/FileActions/DirectoryWatcher';
 import AddToConversationHistoryRequest from './AddToConversationHistoryRequest';
+import FileActionEntity from '../Core/Entities/FileActionEntity';
 
 export default class StartController {
     constructor(
@@ -42,7 +43,7 @@ export default class StartController {
         conversationRequest.transcription = response.transcription;
 
         console.log('Starte KI Anfrage');
-        const conversationResponse = new ConversationResponse();
+        const conversationResponse: ConversationResponse = new ConversationResponse();
         await this.gptConversationUseCase.handleConversation(conversationRequest, conversationResponse);
         console.log('KI Antwort:', conversationResponse.comments);
 
@@ -56,7 +57,7 @@ export default class StartController {
         }
     }
 
-    private async executeFileActions(actions: Array<string>): Promise<void> {
+    private async executeFileActions(actions: Array<FileActionEntity>): Promise<void> {
         this.directoryWatcher.pauseWatching();
         const fileActionRequest: FileActionRequest = new FileActionRequest();
         fileActionRequest.actions = actions;

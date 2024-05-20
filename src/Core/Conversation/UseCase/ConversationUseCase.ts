@@ -8,6 +8,7 @@ import SystemPromptService from '../SystemPromptService';
 import GptResponseProcessor from '../../Processor/GptResponseProcessor';
 import FileCollectorService from '../FileCollectorService';
 import AddToConversationHistoryRequest from './AddToConversationHistoryRequest';
+import FileActionEntity from '../../Entities/FileActionEntity';
 
 export default class ConversationUseCase {
     constructor(
@@ -47,7 +48,7 @@ export default class ConversationUseCase {
         await this.conversationLogger.logConversation(conversationHistory);
         const {comments, actions}: {
             comments: Array<string>,
-            actions: Array<string>
+            actions: Array<FileActionEntity>
         } = await this.gptResponseProcessor.processResponse(responseText);
 
         response.comments = comments.join('\n');
@@ -72,4 +73,3 @@ export default class ConversationUseCase {
         await this.conversationStorage.saveFileContent(changedFiles);
     }
 }
-
