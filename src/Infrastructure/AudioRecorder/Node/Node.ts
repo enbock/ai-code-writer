@@ -181,6 +181,7 @@ class RecordingHandler {
 
 export default class Node implements AudioRecorder {
     private silenceThreshold: number = 0;
+    private currentRecordingHandler?: RecordingHandler;
 
     constructor(
         private config: NodeAudioRecorderConfig
@@ -188,12 +189,30 @@ export default class Node implements AudioRecorder {
     }
 
     public async startRecording(): Promise<Buffer> {
-        let buffer: Buffer | undefined;
+        if (this.currentRecordingHandler) {
+            this.currentRecordingHandler.stopRecording();
+        }
 
-        while (!buffer || buffer.length == 0)
-            buffer = await this.runRecording();
+        return new Promise<Buffer>((resolve, reject): void => {
+            const handler: RecordingHandler = new RecordingHandler(
+                resolve,
+                reject,
+                this.config,
+                this.silenceThreshold,
+                this.changeSilenceThreshold.bind(this)
+            );
+            this.currentRecordingHandler = handler;
+            handler.startRecording().catch((error) => {
+                reject(error);
+            });
+        });
+    }
 
-        return buffer;
+    public async stopRecording(): Promise<void> {
+        if (this.currentRecordingHandler) {
+            this.currentRecordingHandler.stopRecording();
+            this.currentRecordingHandler = undefined;
+        }
     }
 
     public async measureNoiseLevel(): Promise<void> {
@@ -211,25 +230,6 @@ export default class Node implements AudioRecorder {
             setTimeout(() => {
                 handler.stopRecording();
             }, this.config.NOISE_MEASUREMENT_DURATION);
-        });
-    }
-
-    private runRecording() {
-        return new Promise<Buffer>((resolve, reject): void => {
-            const retryCallback = () => {
-                const handler: RecordingHandler = new RecordingHandler(
-                    resolve,
-                    reject,
-                    this.config,
-                    this.silenceThreshold,
-                    this.changeSilenceThreshold.bind(this)
-                );
-                handler.startRecording().catch(() => {
-                    retryCallback();
-                });
-            };
-
-            retryCallback();
         });
     }
 

@@ -10,6 +10,8 @@ import AddToConversationHistoryRequest from './AddToConversationHistoryRequest';
 import FileActionEntity from '../Core/Entities/FileActionEntity';
 
 export default class StartController {
+    private paused: boolean = false;
+
     constructor(
         private audioUseCase: AudioUseCase,
         private gptConversationUseCase: ConversationUseCase,
@@ -17,25 +19,44 @@ export default class StartController {
         private directoryWatcher: DirectoryWatcher
     ) {
         this.directoryWatcher.onChange(this.handleDirectoryChange.bind(this));
+        process.stdin.setRawMode(true);
+        process.stdin.resume();
+        process.stdin.on('data', this.handleKeyPress.bind(this));
+        process.on('SIGINT', this.handleExit.bind(this));
     }
 
     public async start(): Promise<void> {
         await this.gptConversationUseCase.initialize();
         this.directoryWatcher.startWatching();
         await this.audioUseCase.measureNoiseLevel();
-        const helloAudio: Buffer = await this.audioUseCase.transformTextToAudio('Der K.I. Code Writer ist bereit.');
-        console.log('Der KI Code Writer ist bereit.');
-        await this.audioUseCase.playAudio(helloAudio);
+        await this.introduction();
 
         // noinspection InfiniteLoopJS
         while (true) {
+            if (this.paused) {
+                await new Promise<void>(resolve => setTimeout(resolve, 1000));
+                continue;
+            }
+
             const response: AudioResponse = new AudioResponse();
-
             await this.audioUseCase.recordAndProcess(response);
-            console.log('Ihre Eingabe:', response.transcription);
 
-            if (response.transcription != '') await this.runConversation(response);
+            if (response.transcription != '' && !this.paused) {
+                console.log('Ihre Eingabe:', response.transcription);
+                await this.runConversation(response);
+            }
         }
+    }
+
+    private async introduction() {
+        const helloAudio: Buffer = await this.audioUseCase.transformTextToAudio(
+            'Der K.I. Code Writer ist bereit. ' +
+            'Sie können das Programm mit Steuerung plus "C" oder der Taste "e" beenden und mit der Taste "p" pausieren'
+        );
+        console.log('Der KI Code Writer ist bereit.');
+        const audioPromise: Promise<void> = this.audioUseCase.playAudio(helloAudio);
+        console.log('Sie können das Programm mit Strg+C oder "e" beenden und mit "p" pausieren.');
+        await audioPromise;
     }
 
     private async runConversation(response: AudioResponse): Promise<void> {
@@ -71,6 +92,24 @@ export default class StartController {
         addToConversationHistoryRequest.fileName = fileName;
 
         await this.gptConversationUseCase.addToConversationHistory(addToConversationHistoryRequest);
-        console.log('Directory Change Recorded:', fileName);
+        console.log('Datei geändert:', fileName);
+    }
+
+    private async handleKeyPress(key: Buffer): Promise<void> {
+        const keyString: string = key.toString();
+        let charCode: number = [...key.values()][0] || 0;
+        if (keyString.toLowerCase() === 'p') {
+            this.paused = !this.paused;
+            console.log(this.paused ? 'Programm pausiert' : 'Programm fortgesetzt');
+            await this.audioUseCase.stopRecording();
+        } else if (keyString.toLowerCase() === 'e' || charCode == 3) {
+            this.handleExit();
+        }
+    }
+
+    private handleExit(): void {
+        console.log('Programm beendet');
+        process.exit(0);
     }
 }
+

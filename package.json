@@ -1,6 +1,6 @@
 {
   "name": "ai-code-writer",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "An AI code writer application using OpenAI APIs for audio transcription and chat completion.",
   "main": "build/index.js",
   "scripts": {

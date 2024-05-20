@@ -1,5 +1,4 @@
 import {AudioBuffer, AudioBufferSourceNode, AudioContext, GainNode} from 'node-web-audio-api';
-import * as readline from 'readline';
 
 export default class AudioFilePlayer {
     private buffer?: Buffer;
@@ -36,21 +35,9 @@ export default class AudioFilePlayer {
         source.connect(this.gainNode);
         source.start(this.audioContext.currentTime);
 
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-
-        rl.on('line', async () => {
-            rl.close();
-            await this.stop();
-            this.endCallback();
-        });
-
         await new Promise<void>((resolve) => {
             source.onended = (_: Event) => resolve();
         });
-        rl.close();
         await this.cleanAudio();
         this.endCallback();
     }

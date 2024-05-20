@@ -21,6 +21,10 @@ export default class AudioUseCase {
         response.transcription = transcription;
     }
 
+    public async stopRecording(): Promise<void> {
+        return this.audioRecorder.stopRecording();
+    }
+
     public async transformTextToAudio(text: string): Promise<Buffer> {
         return this.audioTransformClient.transformTextToAudio(text);
     }
