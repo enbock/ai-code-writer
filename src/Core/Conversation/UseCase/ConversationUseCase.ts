@@ -27,9 +27,9 @@ export default class ConversationUseCase {
 
         if (conversationHistory.length != 0) return;
 
-        const systemPrompt = this.systemPromptService.getSystemPrompt();
+        const systemPrompt: string = this.systemPromptService.getSystemPrompt();
         conversationHistory.push({role: 'system', content: systemPrompt});
-        const filesContent = await this.fileCollectorService.collectFiles();
+        const filesContent: string = await this.fileCollectorService.collectFiles();
         conversationHistory.push({role: 'user', content: filesContent});
 
         await this.conversationStorage.saveConversation(conversationHistory);
@@ -55,7 +55,7 @@ export default class ConversationUseCase {
         response.actions = actions;
     }
 
-    private async addModifiedFilesToConversation(conversationHistory: Array<ChatCompletionMessageParam>) {
+    private async addModifiedFilesToConversation(conversationHistory: Array<ChatCompletionMessageParam>): Promise<void> {
         const map: Map<string, string> = await this.conversationStorage.loadFileContent();
 
         for (const fileContent of map.values()) {

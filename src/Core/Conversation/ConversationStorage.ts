@@ -9,4 +9,3 @@ export default interface ConversationStorage {
 
     loadFileContent(): Promise<Map<string, string>>;
 }
-

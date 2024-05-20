@@ -5,4 +5,3 @@ export default interface DirectoryWatcher {
     resumeWatching(): void;
     onChange(callback: (action: string, fileName: string) => void): void;
 }
-
