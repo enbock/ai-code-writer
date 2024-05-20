@@ -7,7 +7,9 @@
     "build": "tsc --build",
     "start": "tsc && node build/index.js",
     "dev": "ts-node-dev src/index.ts",
-    "test:npx-start": "npx ."
+    "test:npx-start": "npx .",
+    "deploy:npm": "npm publish",
+    "deploy": "npm-run-all --serial build deploy:npm"
   },
   "bin": {
     "ai-code-writer": "build/index.js"
@@ -40,6 +42,7 @@
   "devDependencies": {
     "@types/node": "*",
     "@types/node-microphone": "*",
-    "typescript": "*"
+    "typescript": "*",
+    "npm-run-all": "*"
   }
 }
