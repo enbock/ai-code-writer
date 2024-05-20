@@ -6,14 +6,28 @@ An AI code writer application using OpenAI APIs for audio transcription and chat
 
 ## Important Notice
 
-When running this application, the files and directories in the current working directory will be sent to OpenAI for processing. See more in the filters section to know which files are involved.
+When running this application, the files and directories in the current working directory will be sent to OpenAI for
+processing. See more in the filters section to know which files are involved.
 
 ## Filters
 
-The application uses the following filters for file collection and monitoring, which can be configured via environment variables:
-- **Include Patterns**: `INCLUDE_PATTERNS` (default: `*.ts,*.json,*.yaml,*.md`)
+The application uses the following filters for file collection and monitoring, which can be configured via environment
+variables:
+
+- **Include Patterns**: `INCLUDE_PATTERNS` (default: `*.ts,*.json,*.yaml,*.md,.env.dist`)
 - **Exclude Directories**: `EXCLUDE_DIRS` (default: `node_modules,build,.git`)
 - **Exclude Files**: `EXCLUDE_FILES` (default: `package-lock.json,.*`)
+
+## Optional Environment Variables
+
+In addition to the mandatory `OPENAI_API_KEY`, the application supports several optional environment variables:
+
+- **OPENAI_API_ORG**: Your OpenAI organization ID (if applicable).
+- **OPENAI_AUDIO_TEMPERATURE**: The temperature setting for audio transformations (default: `0.1`).
+- **OPENAI_CHAT_TEMPERATURE**: The temperature setting for chat completions (default: `0.75`).
+- **INCLUDE_PATTERNS**: Patterns for files to include in processing (default: `*.ts,*.json,*.yaml,*.md,.env.dist`).
+- **EXCLUDE_DIRS**: Directories to exclude from processing (default: `node_modules,build,.git`).
+- **EXCLUDE_FILES**: Files to exclude from processing (default: `package-lock.json,.*`).
 
 ## Usage
 
@@ -25,7 +39,7 @@ npx ai-code-writer
 
 1. **Starting the Application**:
     - Ensure that the environment variable `OPENAI_API_KEY` is set.
-    - Optionally, set the filter environment variables (`INCLUDE_PATTERNS`, `EXCLUDE_DIRS`, `EXCLUDE_FILES`).
+    - Optionally, set the filter environment variables as described in the "Optional Environment Variables" section.
     - Start the application with the command `npx ai-code-writer`.
 
 2. **Interaction**:
@@ -59,3 +73,4 @@ Endre Bock <dev@itbock.de>
 - [Leer en español](./README_es.md)
 - [阅读中文](./README_zh.md)
 - [Lire en français](./README_fr.md)
+

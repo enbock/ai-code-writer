@@ -14,42 +14,44 @@ import FileCollectorService from '../Core/Conversation/FileCollectorService';
 import FileCollector from '../Infrastructure/Conversation/FileCollector/FileCollector';
 import FileActionUseCase from '../Core/FileActions/FileActionUseCase';
 import FsDirectoryWatcher from '../Infrastructure/FileActions/FsDirectoryWatcher';
-import * as dotenv from 'dotenv';
 import {OpenAI} from 'openai';
 import AudioUseCase from '../Core/Audio/AudioUseCase';
 import NodeAudioRecorderConfig from '../Infrastructure/AudioRecorder/Node/NodeAudioRecorderConfig';
 import ConversationUseCase from '../Core/Conversation/UseCase/ConversationUseCase';
 import AudioRecorder from '../Core/Audio/AudioRecorder';
-
-dotenv.config();
+import CommandHandler from '../Core/Processor/CommandHandlers/CommandHandler';
+import CommentCommand from '../Core/Processor/CommandHandlers/CommentCommand';
+import FileWriteCommand from '../Core/Processor/CommandHandlers/FileWriteCommand';
+import FileMoveCommand from '../Core/Processor/CommandHandlers/FileMoveCommand';
+import FileDeleteCommand from '../Core/Processor/CommandHandlers/FileDeleteCommand';
+import Config from './Config';
 
 class GlobalContainer {
-    private apiKey: string = String(process.env.OPENAI_API_KEY || '');
+    private config: Config = new Config();
     private openAi: OpenAI = new OpenAI({
-        organization: String(process.env.OPENAI_API_ORG || ''),
-        apiKey: this.apiKey
+        organization: this.config.openAiOrg,
+        apiKey: this.config.apiKey
     });
 
     private conversationStorage: InMemoryConversationStorage = new InMemoryConversationStorage();
     private systemPromptService: SystemPromptServiceDefinedSystemPrompt = new SystemPromptServiceDefinedSystemPrompt();
     private conversationLogger: NoopConversationLogger = new NoopConversationLogger();
     private fileSystemActionHandler: FileSystemActionHandler = new FileSystemActionHandler();
-    private gptResponseProcessor: GptResponseProcessor = new GptResponseProcessor();
-
     private fileCollectorService: FileCollectorService = new FileCollector(
         '.',
-        (process.env.INCLUDE_PATTERNS || '*.ts,*.json,*.yaml,*.md').split(','),
-        (process.env.EXCLUDE_DIRS || 'node_modules,build,.git').split(','),
-        (process.env.EXCLUDE_FILES || 'package-lock.json,.*').split(',')
+        this.config.includePatterns,
+        this.config.excludeDirs,
+        this.config.excludeFiles
     );
-
     private conversationChatCompletionClientOpenAiChat: ConversationChatCompletionClientOpenAiChat = new ConversationChatCompletionClientOpenAiChat(
-        this.openAi
+        this.openAi,
+        this.config.openAiChatTemperature
     );
     private audioTransformClientOpenAi: AudioTransformClientOpenAiAudio = new AudioTransformClientOpenAiAudio(
         'https://api.openai.com/v1/audio/speech',
-        this.apiKey,
-        this.openAi
+        this.config.apiKey,
+        this.openAi,
+        this.config.openAiAudioTemperature
     );
     private audioRecorderConfig: NodeAudioRecorderConfig = new NodeAudioRecorderConfig();
     private audioRecorder: AudioRecorder = new NodeAudioRecorder(this.audioRecorderConfig);
@@ -59,6 +61,20 @@ class GlobalContainer {
         this.audioRecorder,
         this.audioPlayer
     );
+    private fileActionUseCase: FileActionUseCase = new FileActionUseCase(this.fileSystemActionHandler);
+    private directoryWatcher: FsDirectoryWatcher = new FsDirectoryWatcher(
+        '.',
+        this.config.includePatterns,
+        this.config.excludeDirs,
+        this.config.excludeFiles
+    );
+    private commandHandlers: Array<CommandHandler> = [
+        new CommentCommand(),
+        new FileWriteCommand(),
+        new FileMoveCommand(),
+        new FileDeleteCommand()
+    ];
+    private gptResponseProcessor: GptResponseProcessor = new GptResponseProcessor(this.commandHandlers);
     private conversationUseCase: ConversationUseCase = new ConversationUseCase(
         this.conversationChatCompletionClientOpenAiChat,
         this.conversationStorage,
@@ -66,13 +82,6 @@ class GlobalContainer {
         this.systemPromptService,
         this.gptResponseProcessor,
         this.fileCollectorService
-    );
-    private fileActionUseCase: FileActionUseCase = new FileActionUseCase(this.fileSystemActionHandler);
-    private directoryWatcher: FsDirectoryWatcher = new FsDirectoryWatcher(
-        '.',
-        (process.env.INCLUDE_PATTERNS || '*.ts,*.json,*.yaml,*.md').split(','),
-        (process.env.EXCLUDE_DIRS || 'node_modules,build,.git').split(','),
-        (process.env.EXCLUDE_FILES || 'package-lock.json,.*').split(',')
     );
     public startController: StartController = new StartController(
         this.audioUseCase,

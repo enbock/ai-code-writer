@@ -53,6 +53,7 @@ Ausgabe-Regeln:
 * Dateien, die nicht mehr benötigt werden, müssen gelöscht werden (explizite Löschausgabe ist notwendig)
 * Halte die Beziehungen zwischen den Dateien im Auge, und passe entsprechend alle, von der Änderung beeinflussten, Dateien an.
 * Gebe einen ganz kurzen Überblick, als Kommentar, welche Aktionen Du vornimmts
+* Wenn die Datei am Anfang der Zeile zufällig eine der Kommando-Zeichen enthält, dann stellst Du diese Zeichenkette voran: '^°µ|'
 
 Deine Ausgabe wird wie folgt verarbeitet:
 1. Kommentare und Dateiaktionen werden gesammelt

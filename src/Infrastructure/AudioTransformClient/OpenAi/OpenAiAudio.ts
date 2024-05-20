@@ -9,7 +9,8 @@ export default class OpenAiAudio implements AudioTransformClient {
     constructor(
         private apiUrl: string,
         private openApiKey: string,
-        private openAi: OpenAI
+        private openAi: OpenAI,
+        private temperature: number
     ) {
     }
 
@@ -21,7 +22,7 @@ export default class OpenAiAudio implements AudioTransformClient {
                 file: file,
                 model: 'whisper-1',
                 response_format: 'json',
-                temperature: 0.3
+                temperature: this.temperature
             });
             return transcription.text;
         } catch (error) {
@@ -64,3 +65,4 @@ export default class OpenAiAudio implements AudioTransformClient {
         return Buffer.from(audioBuffer);
     }
 }
+

@@ -14,9 +14,22 @@ OpenAI gesendet. Siehe mehr bei den Filtern, welche Dateien involviert werden.
 Die Anwendung verwendet die folgenden Filter für die Dateisammlung und -überwachung, die über Umgebungsvariablen
 konfiguriert werden können:
 
-- **Einschlussmuster**: `INCLUDE_PATTERNS` (Standard: `*.ts,*.json,*.yaml,*.md`)
+- **Einschlussmuster**: `INCLUDE_PATTERNS` (Standard: `*.ts,*.json,*.yaml,*.md,.env.dist`)
 - **Auszuschließende Verzeichnisse**: `EXCLUDE_DIRS` (Standard: `node_modules,build,.git`)
 - **Auszuschließende Dateien**: `EXCLUDE_FILES` (Standard: `package-lock.json,.*`)
+
+## Optionale Umgebungsvariablen
+
+Zusätzlich zur obligatorischen Variable `OPENAI_API_KEY` unterstützt die Anwendung mehrere optionale Umgebungsvariablen:
+
+- **OPENAI_API_ORG**: Ihre OpenAI-Organisations-ID (falls zutreffend).
+- **OPENAI_AUDIO_TEMPERATURE**: Die Temperatureinstellung für Audio-Transformationen (Standard: `0.1`).
+- **OPENAI_CHAT_TEMPERATURE**: Die Temperatureinstellung für Chat-Vervollständigungen (Standard: `0.75`).
+- **INCLUDE_PATTERNS**: Muster für Dateien, die in die Verarbeitung einbezogen werden sollen (
+  Standard: `*.ts,*.json,*.yaml,*.md,.env.dist`).
+- **EXCLUDE_DIRS**: Verzeichnisse, die von der Verarbeitung ausgeschlossen werden sollen (
+  Standard: `node_modules,build,.git`).
+- **EXCLUDE_FILES**: Dateien, die von der Verarbeitung ausgeschlossen werden sollen (Standard: `package-lock.json,.*`).
 
 ## Verwendung
 
@@ -28,7 +41,7 @@ npx ai-code-writer
 
 1. **Starten der Anwendung**:
     - Stellen Sie sicher, dass die Umgebungsvariable `OPENAI_API_KEY` gesetzt ist.
-    - Optional können die Filter-Umgebungsvariablen (`INCLUDE_PATTERNS`, `EXCLUDE_DIRS`, `EXCLUDE_FILES`) gesetzt
+    - Optional können die Filter-Umgebungsvariablen wie im Abschnitt "Optionale Umgebungsvariablen" beschrieben gesetzt
       werden.
     - Starten Sie die Anwendung mit dem Befehl `npx ai-code-writer`.
 
@@ -65,3 +78,4 @@ Endre Bock <dev@itbock.de>
 - [Leer en español](./README_es.md)
 - [阅读中文](./README_zh.md)
 - [Lire en français](./README_fr.md)
+

@@ -6,14 +6,30 @@ Une application de rédaction de code AI utilisant les API d'OpenAI pour la tran
 
 ## Avis Important
 
-Lors de l'exécution de cette application, les fichiers et répertoires dans le répertoire de travail actuel seront envoyés à OpenAI pour traitement. Voir plus dans la section des filtres pour savoir quels fichiers sont impliqués.
+Lors de l'exécution de cette application, les fichiers et répertoires dans le répertoire de travail actuel seront
+envoyés à OpenAI pour traitement. Voir plus dans la section des filtres pour savoir quels fichiers sont impliqués.
 
 ## Filtres
 
-L'application utilise les filtres suivants pour la collecte et la surveillance des fichiers, qui peuvent être configurés via des variables d'environnement :
-- **Modèles d'inclusion** : `INCLUDE_PATTERNS` (par défaut : `*.ts,*.json,*.yaml,*.md`)
+L'application utilise les filtres suivants pour la collecte et la surveillance des fichiers, qui peuvent être configurés
+via des variables d'environnement :
+
+- **Modèles d'inclusion** : `INCLUDE_PATTERNS` (par défaut : `*.ts,*.json,*.yaml,*.md,.env.dist`)
 - **Répertoires exclus** : `EXCLUDE_DIRS` (par défaut : `node_modules,build,.git`)
 - **Fichiers exclus** : `EXCLUDE_FILES` (par défaut : `package-lock.json,.*`)
+
+## Variables d'environnement optionnelles
+
+En plus de la variable obligatoire `OPENAI_API_KEY`, l'application prend en charge plusieurs variables d'environnement
+optionnelles :
+
+- **OPENAI_API_ORG** : Votre identifiant d'organisation OpenAI (le cas échéant).
+- **OPENAI_AUDIO_TEMPERATURE** : Réglage de la température pour les transformations audio (par défaut : `0.1`).
+- **OPENAI_CHAT_TEMPERATURE** : Réglage de la température pour les complétions de chat (par défaut : `0.75`).
+- **INCLUDE_PATTERNS** : Modèles pour les fichiers à inclure dans le traitement (par
+  défaut : `*.ts,*.json,*.yaml,*.md,.env.dist`).
+- **EXCLUDE_DIRS** : Répertoires à exclure du traitement (par défaut : `node_modules,build,.git`).
+- **EXCLUDE_FILES** : Fichiers à exclure du traitement (par défaut : `package-lock.json,.*`).
 
 ## Utilisation
 
@@ -25,7 +41,8 @@ npx ai-code-writer
 
 1. **Démarrer l'application** :
     - Assurez-vous que la variable d'environnement `OPENAI_API_KEY` est définie.
-    - Facultativement, définissez les variables d'environnement des filtres (`INCLUDE_PATTERNS`, `EXCLUDE_DIRS`, `EXCLUDE_FILES`).
+    - Facultativement, définissez les variables d'environnement des filtres comme décrit dans la section "Variables
+      d'environnement optionnelles".
     - Démarrez l'application avec la commande `npx ai-code-writer`.
 
 2. **Interaction** :
@@ -35,7 +52,8 @@ npx ai-code-writer
 3. **Conversation** :
     - L'entrée transcrite sera envoyée à l'API d'OpenAI pour obtenir une réponse.
     - La réponse de l'AI sera lue à haute voix et affichée sur la console.
-    - Si la réponse contient des tâches de fichiers (par exemple, créer, déplacer, supprimer des fichiers), elles seront exécutées automatiquement.
+    - Si la réponse contient des tâches de fichiers (par exemple, créer, déplacer, supprimer des fichiers), elles seront
+      exécutées automatiquement.
 
 4. **Surveillance des fichiers** :
     - Les modifications des fichiers surveillés seront détectées et enregistrées dans l'historique des conversations.
@@ -43,7 +61,8 @@ npx ai-code-writer
 
 5. **Arrêter l'application** :
     - L'application fonctionne dans une boucle infinie en attendant l'entrée de l'utilisateur.
-    - Pour arrêter l'application, utilisez les méthodes habituelles pour arrêter un processus Node.js (par exemple, `Ctrl+C` dans la console).
+    - Pour arrêter l'application, utilisez les méthodes habituelles pour arrêter un processus Node.js (par
+      exemple, `Ctrl+C` dans la console).
 
 ## Licence
 
@@ -59,3 +78,4 @@ Endre Bock <dev@itbock.de>
 - [Auf Deutsch lesen](./README_de.md)
 - [Leer en español](./README_es.md)
 - [阅读中文](./README_zh.md)
+

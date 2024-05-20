@@ -11,9 +11,21 @@
 ## 过滤器
 
 该应用程序使用以下过滤器进行文件收集和监控，这些过滤器可以通过环境变量进行配置：
-- **包含模式**：`INCLUDE_PATTERNS`（默认：`*.ts,*.json,*.yaml,*.md`）
+
+- **包含模式**：`INCLUDE_PATTERNS`（默认：`*.ts,*.json,*.yaml,*.md,.env.dist`）
 - **排除目录**：`EXCLUDE_DIRS`（默认：`node_modules,build,.git`）
 - **排除文件**：`EXCLUDE_FILES`（默认：`package-lock.json,.*`）
+
+## 可选环境变量
+
+除了必需的 `OPENAI_API_KEY` 变量，应用程序还支持几个可选的环境变量：
+
+- **OPENAI_API_ORG**：您的 OpenAI 组织 ID（如果适用）。
+- **OPENAI_AUDIO_TEMPERATURE**：音频转换的温度设置（默认：`0.1`）。
+- **OPENAI_CHAT_TEMPERATURE**：聊天完成的温度设置（默认：`0.75`）。
+- **INCLUDE_PATTERNS**：要包含在处理中的文件模式（默认：`*.ts,*.json,*.yaml,*.md,.env.dist`）。
+- **EXCLUDE_DIRS**：要从处理中排除的目录（默认：`node_modules,build,.git`）。
+- **EXCLUDE_FILES**：要从处理中排除的文件（默认：`package-lock.json,.*`）。
 
 ## 使用方法
 
@@ -25,7 +37,7 @@ npx ai-code-writer
 
 1. **启动应用程序**：
     - 确保环境变量 `OPENAI_API_KEY` 已设置。
-    - 可选地，设置过滤器环境变量（`INCLUDE_PATTERNS`，`EXCLUDE_DIRS`，`EXCLUDE_FILES`）。
+    - 可选地，设置过滤器环境变量，如“可选环境变量”部分所述。
     - 使用命令 `npx ai-code-writer` 启动应用程序。
 
 2. **互动**：

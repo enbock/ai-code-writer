@@ -1,12 +1,21 @@
+import CommandWords from './CommandWords';
+import CommandHandler from './CommandHandlers/CommandHandler';
+
 export default class GptResponseProcessor {
+    constructor(
+        private commandHandlers: Array<CommandHandler>
+    ) {
+    }
+
     public async processResponse(response: string): Promise<{ comments: string[], actions: string[] }> {
-        const lines: Array<string> = response.split('\n');
+        const correctedResponse: string = this.ensureInitialCommandWord(response);
+        const lines: Array<string> = correctedResponse.split('\n');
         let currentSection: Array<string> = [];
         let comments: Array<string> = [];
         let actions: Array<string> = [];
 
         for (const line of lines) {
-            if (line.startsWith('===') || line.startsWith('<<<') || line.startsWith('>>>') || line.startsWith('---')) {
+            if (this.isCommand(line)) {
                 if (currentSection.length > 0) {
                     const {
                         comments: sectionComments,
@@ -30,22 +39,37 @@ export default class GptResponseProcessor {
     }
 
     private async processSection(section: Array<string>): Promise<{ comments: string[], actions: string[] }> {
-        const command: string = section.shift()!;
+        const command: string = this.removePrefix(section[0]);
 
-        if (command.startsWith('===')) {
-            return {comments: [command.replace(/^=== /, '') + section.join('\n')], actions: []};
-        } else if (command.startsWith('<<<')) {
-            const filePath: string = command.slice(3).trim();
-            const content: string = section.join('\n');
-            return {comments: [], actions: [`<<< ${filePath}\n${content}`]};
-        } else if (command.startsWith('>>>')) {
-            const [source, destination]: Array<string> = command.slice(3).trim().split(/\s+/);
-            return {comments: [], actions: [`>>> ${source} ${destination}`]};
-        } else if (command.startsWith('---')) {
-            const filePath: string = command.slice(3).trim();
-            return {comments: [], actions: [`--- ${filePath}`]};
+        for (const handler of this.commandHandlers) {
+            if (handler.canHandle(command)) {
+                const processedSection: Array<string> = section.map(line => this.removePrefix(line));
+                return handler.handle(processedSection);
+            }
         }
 
         return {comments: [], actions: []};
+    }
+
+    private isCommand(line: string): boolean {
+        return (
+            line.startsWith(CommandWords.COMMENT) ||
+            line.startsWith(CommandWords.FILE_WRITE) ||
+            line.startsWith(CommandWords.FILE_MOVE) ||
+            line.startsWith(CommandWords.FILE_DELETE)
+        );
+    }
+
+    private removePrefix(line: string): string {
+        const prefix: string = '^°µ|';
+        return line.startsWith(prefix) ? line.slice(prefix.length) : line;
+    }
+
+    private ensureInitialCommandWord(response: string): string {
+        const lines: Array<string> = response.split('\n');
+        if (lines.length > 0 && !this.isCommand(lines[0])) {
+            lines[0] = `${CommandWords.COMMENT}${lines[0]}`;
+        }
+        return lines.join('\n');
     }
 }

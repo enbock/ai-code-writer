@@ -4,7 +4,8 @@ import {ChatCompletion, ChatCompletionMessageParam} from 'openai/resources';
 
 export default class OpenAiChat implements ChatCompletionClient {
     constructor(
-        private openai: OpenAI
+        private openai: OpenAI,
+        private temperature: number
     ) {
     }
 
@@ -15,10 +16,11 @@ export default class OpenAiChat implements ChatCompletionClient {
             max_tokens: 4095,
             presence_penalty: 0,
             frequency_penalty: 0,
-            temperature: 1,
+            temperature: this.temperature,
             top_p: 1,
             messages: messages
         });
         return response.choices[0]?.message?.content || '';
     }
 }
+
