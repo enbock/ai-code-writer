@@ -52,7 +52,7 @@ export default class OpenAiChat implements ChatCompletionClient {
                 }
             }
 
-            this.logger.log(' Done\n');
+            this.logger.log('Done                            \n');
             this.logger.log(`Output Tokens: ${outputTokens}`);
             return responseContent;
         } catch (error) {

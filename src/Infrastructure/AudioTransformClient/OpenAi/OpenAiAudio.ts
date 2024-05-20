@@ -73,7 +73,7 @@ export default class OpenAiAudio implements AudioTransformClient {
         try {
             const response: Transcription = await responsePromise;
             clearInterval(progressInterval);
-            this.logger.log('Progress: Done\n');
+            this.logger.log('Progress: Done               \n');
             return response.text;
         } catch (error) {
             clearInterval(progressInterval);
@@ -94,7 +94,7 @@ export default class OpenAiAudio implements AudioTransformClient {
         try {
             const response: Response = await responsePromise;
             clearInterval(progressInterval);
-            this.logger.log('Progress: Done\n');
+            this.logger.log('Progress: Done               \n');
             if (response.ok == false) {
                 return Buffer.from(OpenAiAudio.FALLBACK, 'base64');
             }
