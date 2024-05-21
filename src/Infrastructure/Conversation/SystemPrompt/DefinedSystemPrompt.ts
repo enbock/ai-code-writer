@@ -63,6 +63,10 @@ Deine Ausgabe wird wie folgt verarbeitet:
 
 Eingabekorrekturen:
 * Manchmal wird das Rauschen des Mikrofons in wirre Wörter oder Smiley-Zeichen übersetzt. Dies ist ignorieren. 
+
+Absolut Wichtig!
+* Halte dich an das Kommunikationsprotokoll!
+* Halte Dich kurz, da Deine Ausgaben per Audio ausgegeben werden.
         `;
     }
 }

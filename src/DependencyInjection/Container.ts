@@ -26,6 +26,8 @@ import FileMoveCommand from '../Core/Processor/CommandHandlers/FileMoveCommand';
 import FileDeleteCommand from '../Core/Processor/CommandHandlers/FileDeleteCommand';
 import Config from './Config';
 import Logger from '../Infrastructure/Logger/Logger';
+import FileConversationLogger from '../Infrastructure/Conversation/ConversationLogger/FileConversationLogger';
+import ConversationLogger from '../Core/Conversation/ConversationLogger';
 
 class GlobalContainer {
     private config: Config = new Config();
@@ -36,7 +38,7 @@ class GlobalContainer {
 
     private conversationStorage: InMemoryConversationStorage = new InMemoryConversationStorage();
     private systemPromptService: SystemPromptServiceDefinedSystemPrompt = new SystemPromptServiceDefinedSystemPrompt();
-    private conversationLogger: NoopConversationLogger = new NoopConversationLogger();
+    private conversationLogger: ConversationLogger = process.env.DEBUG_TO_FILE ? new FileConversationLogger() : new NoopConversationLogger();
     private fileSystemActionHandler: FileSystemActionHandler = new FileSystemActionHandler(new Logger());
     private fileCollectorService: FileCollectorService = new FileCollector(
         '.',
@@ -97,3 +99,4 @@ class GlobalContainer {
 
 const Container: GlobalContainer = new GlobalContainer();
 export default Container;
+

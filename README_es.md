@@ -31,6 +31,14 @@ Además de la variable obligatoria `OPENAI_API_KEY`, la aplicación admite varia
 - **EXCLUDE_DIRS**: Directorios que se excluirán del procesamiento (predeterminado: `node_modules,build,dist,.git`).
 - **EXCLUDE_FILES**: Archivos que se excluirán del procesamiento (predeterminado: `package-lock.json,.*`).
 
+## Requisitos previos
+
+- **SOX (Sound eXchange)**: Esta aplicación requiere SOX para la grabación de audio. Instale SOX a través de su gestor
+  de paquetes:
+  - **macOS**: `brew install sox`
+  - **Windows**: Descargue el instalador desde el [sitio web oficial](http://sox.sourceforge.net/)
+  - **Linux**: Use el gestor de paquetes de su distribución, por ejemplo, `apt-get install sox`
+
 ## Uso
 
 ```sh

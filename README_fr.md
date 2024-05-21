@@ -31,6 +31,14 @@ optionnelles :
 - **EXCLUDE_DIRS** : Répertoires à exclure du traitement (par défaut : `node_modules,build,dist,.git`).
 - **EXCLUDE_FILES** : Fichiers à exclure du traitement (par défaut : `package-lock.json,.*`).
 
+## Prérequis
+
+- **SOX (Sound eXchange)** : Cette application nécessite SOX pour l'enregistrement audio. Installez SOX via votre
+  gestionnaire de paquets :
+  - **macOS** : `brew install sox`
+  - **Windows** : Téléchargez l'installateur depuis le [site officiel](http://sox.sourceforge.net/)
+  - **Linux** : Utilisez le gestionnaire de paquets de votre distribution, par exemple, `apt-get install sox`
+
 ## Utilisation
 
 ```sh
@@ -78,4 +86,3 @@ Endre Bock <dev@itbock.de>
 - [Auf Deutsch lesen](./README_de.md)
 - [Leer en español](./README_es.md)
 - [阅读中文](./README_zh.md)
-

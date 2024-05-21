@@ -31,6 +31,14 @@ Zusätzlich zur obligatorischen Variable `OPENAI_API_KEY` unterstützt die Anwen
   Standard: `node_modules,build,dist,.git`).
 - **EXCLUDE_FILES**: Dateien, die von der Verarbeitung ausgeschlossen werden sollen (Standard: `package-lock.json,.*`).
 
+## Voraussetzungen
+
+- **SOX (Sound eXchange)**: Diese Anwendung erfordert SOX für die Audioaufnahme. Installieren Sie SOX über Ihren
+  Paketmanager:
+  - **macOS**: `brew install sox`
+  - **Windows**: Laden Sie den Installer von der [offiziellen Website](http://sox.sourceforge.net/) herunter
+  - **Linux**: Verwenden Sie den Paketmanager Ihrer Distribution, z.B. `apt-get install sox`
+
 ## Verwendung
 
 ```sh

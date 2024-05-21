@@ -30,6 +30,13 @@ In addition to the mandatory `OPENAI_API_KEY`, the application supports several 
 - **EXCLUDE_DIRS**: Directories to exclude from processing (default: `node_modules,build,dist,.git`).
 - **EXCLUDE_FILES**: Files to exclude from processing (default: `package-lock.json,.*`).
 
+## Prerequisites
+
+- **SOX (Sound eXchange)**: This application requires SOX for audio recording. Install SOX via your package manager:
+  - **macOS**: `brew install sox`
+  - **Windows**: Download the installer from the [official website](http://sox.sourceforge.net/)
+  - **Linux**: Use your distribution's package manager, e.g., `apt-get install sox`
+
 ## Usage
 
 ```sh
