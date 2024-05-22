@@ -39,11 +39,13 @@ export default class StartController {
             }
 
             const response: AudioResponse = new AudioResponse();
+            console.log('Assistent hört...');
             await this.audioUseCase.recordAndProcess(response);
 
             if (response.transcription != '' && !this.paused) {
                 console.log('Ihre Eingabe:', response.transcription);
                 await this.runConversation(response);
+                await this.pause();
             }
         }
     }
@@ -99,12 +101,16 @@ export default class StartController {
         const keyString: string = key.toString();
         let charCode: number = [...key.values()][0] || 0;
         if (keyString.toLowerCase() === 'p') {
-            this.paused = !this.paused;
-            console.log(this.paused ? 'Programm pausiert' : 'Programm fortgesetzt');
-            await this.audioUseCase.stopRecording();
+            await this.pause();
         } else if (keyString.toLowerCase() === 'e' || charCode == 3) {
             this.handleExit();
         }
+    }
+
+    private async pause() {
+        this.paused = !this.paused;
+        console.log(this.paused ? 'Programm pausiert (p zum Fortsetzen)' : 'Programm fortgesetzt');
+        await this.audioUseCase.stopRecording();
     }
 
     private handleExit(): void {
