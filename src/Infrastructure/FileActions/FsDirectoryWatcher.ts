@@ -40,25 +40,28 @@ export default class FsDirectoryWatcher implements DirectoryWatcher {
 
     private async isExcluded(filePath: string): Promise<boolean> {
         for (const excludeDir of this.excludeDirs) {
-            if (filePath.includes(path.sep + excludeDir + path.sep)) return true;
+            if (filePath.includes(path.normalize(excludeDir) + path.sep)) return true;
         }
 
         for (const excludeFile of this.excludeFiles) {
-            if (filePath.endsWith(excludeFile)) return true;
+            if (this.matchPattern(filePath, excludeFile)) return true;
         }
 
         return false;
     }
 
-    private matchPattern(fileName: string, pattern: string): boolean {
+    private matchPattern(filePath: string, pattern: string): boolean {
         const regexPattern = pattern
             .replace(/\./g, '\\.')
-            .replace(/\*/g, '.*');
+            .replace(/\*/g, '.*')
+            .replace(/\?/g, '.');
         const regex = new RegExp(`^${regexPattern}$`);
-        return regex.test(fileName);
+        return regex.test(filePath);
     }
 
     private async isIncluded(filePath: string): Promise<boolean> {
+        if (await this.isExcluded(filePath)) return false;
+
         for (const pattern of this.includePatterns) {
             if (this.matchPattern(path.basename(filePath), pattern)) return true;
         }
@@ -71,7 +74,7 @@ export default class FsDirectoryWatcher implements DirectoryWatcher {
             const filePath = path.resolve(directory, filename);
             const relativeFilePath = path.relative(process.cwd(), filePath);
 
-            if (await this.isExcluded(filePath) || !(await this.isIncluded(filePath))) return;
+            if (!(await this.isIncluded(filePath))) return;
 
             if (eventType === 'rename') {
                 fs.stat(filePath, (err, stats) => {

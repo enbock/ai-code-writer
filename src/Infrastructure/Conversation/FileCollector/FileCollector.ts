@@ -28,11 +28,11 @@ export default class FileCollector implements FileCollectorService {
 
     private async isExcluded(filePath: string): Promise<boolean> {
         for (const excludeDir of this.excludeDirs) {
-            if (filePath.includes(path.sep + excludeDir + path.sep)) return true;
+            if (filePath.includes(path.normalize(excludeDir) + path.sep)) return true;
         }
 
         for (const excludeFile of this.excludeFiles) {
-            if (filePath.endsWith(excludeFile)) return true;
+            if (this.matchPattern(filePath, excludeFile)) return true;
         }
 
         return false;
@@ -59,12 +59,13 @@ export default class FileCollector implements FileCollectorService {
         return files;
     }
 
-    private matchPattern(fileName: string, pattern: string): boolean {
+    private matchPattern(filePath: string, pattern: string): boolean {
         const regexPattern: string = pattern
             .replace(/\./g, '\\.')
-            .replace(/\*/g, '.*');
+            .replace(/\*/g, '.*')
+            .replace(/\?/g, '.');
         const regex: RegExp = new RegExp(`^${regexPattern}$`);
-        return regex.test(fileName);
+        return regex.test(filePath);
     }
 
     private async readFileStream(filePath: string): Promise<string> {
