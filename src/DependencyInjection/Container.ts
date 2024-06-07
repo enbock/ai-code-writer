@@ -49,7 +49,8 @@ class GlobalContainer {
     private conversationChatCompletionClientOpenAiChat: ConversationChatCompletionClientOpenAiChat = new ConversationChatCompletionClientOpenAiChat(
         this.openAi,
         this.config.openAiChatTemperature,
-        this.logger
+        this.logger,
+        this.config.openAiChatModel
     );
     private audioTransformClientOpenAi: AudioTransformClientOpenAiAudio = new AudioTransformClientOpenAiAudio(
         'https://api.openai.com/v1/audio/speech',

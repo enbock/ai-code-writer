@@ -27,6 +27,7 @@
 - **EXCLUDE_DIRS**：要排除的目录（默认：`node_modules,build,dist,.git`）。
 - **EXCLUDE_FILES**：要排除的文件（默认：`package-lock.json,.?*`）。
 - **DEBUG_TO_FILE**：如果设置为`true`，则将对话记录到文件中（默认：`false`）。
+- **OPENAI_CHAT_MODEL**：要用于聊天完成的模型（默认：`gpt-4o`）。
 
 ## 先决条件
 

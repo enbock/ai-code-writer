@@ -9,7 +9,8 @@ export default class OpenAiChat implements ChatCompletionClient {
     constructor(
         private openai: OpenAI,
         private temperature: number,
-        private logger: LoggerService
+        private logger: LoggerService,
+        private model: string
     ) {
     }
 
@@ -22,7 +23,7 @@ export default class OpenAiChat implements ChatCompletionClient {
             const formattedMessages: Array<ChatCompletionMessageParam> = this.aggregateMessages(messages);
             const responseStream: Stream<ChatCompletionChunk> = await this.openai.chat.completions.create({
                 stream: true,
-                model: 'gpt-4o',
+                model: this.model,
                 max_tokens: 4095,
                 presence_penalty: 0,
                 frequency_penalty: 0,

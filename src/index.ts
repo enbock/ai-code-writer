@@ -9,6 +9,7 @@ class App {
                 console.error('export OPENAI_API_KEY=your_openai_api_key_here');
                 console.error('Then run the application using npx:');
                 console.error('npx ts-node src/index.ts');
+                // noinspection ExceptionCaughtLocallyJS
                 throw new Error('OPENAI_API_KEY is not set in environment variables');
             }
             await Container.startController.start();
@@ -18,6 +19,6 @@ class App {
     }
 }
 
-console.log('Version: 2.0.2');
+console.log('Version: 2.0.3');
 
 App.run().then();

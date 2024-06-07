@@ -11,4 +11,5 @@ export default class Config {
     public excludeDirs: Array<string> = (process.env.EXCLUDE_DIRS || 'node_modules,build,dist,.git').split(',');
     public excludeFiles: Array<string> = (process.env.EXCLUDE_FILES || 'package-lock.json,.?*').split(',');
     public logToFile: boolean = process.env.DEBUG_TO_FILE == 'true';
+    public openAiChatModel: string = String(process.env.OPENAI_CHAT_MODEL || 'gpt-4o');
 }

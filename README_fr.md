@@ -31,6 +31,7 @@ optionnelles :
 - **EXCLUDE_DIRS** : Répertoires à exclure du traitement (par défaut : `node_modules,build,dist,.git`).
 - **EXCLUDE_FILES** : Fichiers à exclure du traitement (par défaut : `package-lock.json,.?*`).
 - **DEBUG_TO_FILE** : Si défini sur `true`, enregistre la conversation dans un fichier (par défaut : `false`).
+- **OPENAI_CHAT_MODEL** : Le modèle à utiliser pour les complétions de chat (par défaut : `gpt-4o`).
 
 ## Prérequis
 
@@ -87,3 +88,4 @@ Endre Bock <dev@itbock.de>
 - [Auf Deutsch lesen](./README_de.md)
 - [Leer en español](./README_es.md)
 - [阅读中文](./README_zh.md)
+

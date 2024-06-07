@@ -32,6 +32,7 @@ Zusätzlich zur obligatorischen Variable `OPENAI_API_KEY` unterstützt die Anwen
 - **EXCLUDE_FILES**: Dateien, die von der Verarbeitung ausgeschlossen werden sollen (Standard: `package-lock.json,.*`).
 - **DEBUG_TO_FILE**: Wenn auf `true` gesetzt, werden die Unterhaltungen in einer Datei protokolliert (
   Standard: `false`).
+- **OPENAI_CHAT_MODEL**: Das Modell, das für Chat-Vervollständigungen verwendet werden soll (Standard: `gpt-4o`).
 
 ## Voraussetzungen
 
@@ -88,3 +89,4 @@ Endre Bock <dev@itbock.de>
 - [Leer en español](./README_es.md)
 - [阅读中文](./README_zh.md)
 - [Lire en français](./README_fr.md)
+

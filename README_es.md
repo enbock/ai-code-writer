@@ -31,6 +31,7 @@ Además de la variable obligatoria `OPENAI_API_KEY`, la aplicación admite varia
 - **EXCLUDE_DIRS**: Directorios que se excluirán del procesamiento (predeterminado: `node_modules,build,dist,.git`).
 - **EXCLUDE_FILES**: Archivos que se excluirán del procesamiento (predeterminado: `package-lock.json,.*`).
 - **DEBUG_TO_FILE**: Si se establece en `true`, registra la conversación en un archivo (predeterminado: `false`).
+- **OPENAI_CHAT_MODEL**: El modelo que se utilizará para la finalización del chat (predeterminado: `gpt-4o`).
 
 ## Requisitos previos
 
@@ -87,3 +88,4 @@ Endre Bock <dev@itbock.de>
 - [Leer en alemán](./README_de.md)
 - [阅读中文](./README_zh.md)
 - [Lire en français](./README_fr.md)
+
