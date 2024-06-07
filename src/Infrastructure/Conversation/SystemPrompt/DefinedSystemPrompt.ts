@@ -41,12 +41,11 @@ Eingabekorrekturen:
 * Manchmal wird das Rauschen des Mikrofons in wirre Wörter oder Smiley-Zeichen übersetzt. Dies ist ignorieren. 
 
 Kommunikationsprotokoll:
-Die Syntax ist
-<3-Zeichen-Kommando> [<text> [\\n, <text>]...]
+Die Syntax ist:
+<3-Zeichen-Kommando>[<pfad> ][\\n<text> ...]
 
 === - Kommentar bzw. der Konversation
 <<< Dateipfad - Dateiausgabe
->>> Quelle Ziel - Datei verschieben
 --- Dateipfad - Datei löschen
 
 Ausgabe-Regeln:

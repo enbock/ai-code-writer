@@ -22,7 +22,6 @@ import AudioRecorder from '../Core/Audio/AudioRecorder';
 import CommandHandler from '../Core/Processor/CommandHandlers/CommandHandler';
 import CommentCommand from '../Core/Processor/CommandHandlers/CommentCommand';
 import FileWriteCommand from '../Core/Processor/CommandHandlers/FileWriteCommand';
-import FileMoveCommand from '../Core/Processor/CommandHandlers/FileMoveCommand';
 import FileDeleteCommand from '../Core/Processor/CommandHandlers/FileDeleteCommand';
 import Config from './Config';
 import Logger from '../Infrastructure/Logger/Logger';
@@ -77,7 +76,6 @@ class GlobalContainer {
     private commandHandlers: Array<CommandHandler> = [
         new CommentCommand(),
         new FileWriteCommand(),
-        new FileMoveCommand(),
         new FileDeleteCommand()
     ];
     private gptResponseProcessor: GptResponseProcessor = new GptResponseProcessor(this.commandHandlers);

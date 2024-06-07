@@ -56,7 +56,6 @@ export default class GptResponseProcessor {
         return (
             line.startsWith(CommandWords.COMMENT) ||
             line.startsWith(CommandWords.FILE_WRITE) ||
-            line.startsWith(CommandWords.FILE_MOVE) ||
             line.startsWith(CommandWords.FILE_DELETE)
         );
     }

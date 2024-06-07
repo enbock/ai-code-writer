@@ -25,7 +25,6 @@ export default class ConversationUseCase {
 
     private fileActionToMessageActionMap: Map<FileActionType, ActionType> = new Map([
         [FileActionType.WRITE, ActionType.FILE_WRITE],
-        [FileActionType.MOVE, ActionType.FILE_MOVE],
         [FileActionType.DELETE, ActionType.FILE_DELETE]
     ]);
 
