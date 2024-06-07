@@ -1,10 +1,11 @@
 import CommandHandler from './CommandHandler';
+import ActionType from '../../ActionType';
+import FileActionEntity from '../../FileActionEntity';
 import CommandWords from '../CommandWords';
-import FileActionEntity from '../../Entities/FileActionEntity';
 
 export default class CommentCommand implements CommandHandler {
     public canHandle(command: string): boolean {
-        return command.startsWith(CommandWords.COMMENT);
+        return command.startsWith(ActionType.COMMENT);
     }
 
     public async handle(section: Array<string>): Promise<{ comments: string[], actions: FileActionEntity[] }> {

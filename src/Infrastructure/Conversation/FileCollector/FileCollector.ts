@@ -1,4 +1,4 @@
-import FileCollectorService from '../../../Core/Conversation/FileCollectorService';
+import FileCollectorService, {FileData} from '../../../Core/Conversation/FileCollectorService';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -11,22 +11,28 @@ export default class FileCollector implements FileCollectorService {
     ) {
     }
 
-    public async collectFiles(): Promise<string> {
-        let collectedContent: string = '';
+    public async collectFiles(): Promise<Array<FileData>> {
+        const collectedFiles: Array<FileData> = [];
 
         const files: Array<string> = await this.findFiles(this.sourceDir);
         for (const filePath of files) {
-            if (await this.isExcluded(filePath)) continue;
             const relativeFilePath: string = path.relative(process.cwd(), filePath);
-            console.log('<<<', relativeFilePath);
+            if (this.isExcluded(relativeFilePath)) continue;
+            const excludedByPart: boolean = relativeFilePath.split(path.sep)
+                .find((p) => this.isExcluded(p)) !== undefined
+            ;
+            if (excludedByPart) continue;
+
             const fileContent: string = await this.readFileStream(filePath);
-            collectedContent += `<<< ${relativeFilePath}\n${fileContent}\n\n`;
+            console.log('<<< ', relativeFilePath);
+
+            collectedFiles.push({filePath: relativeFilePath, content: fileContent});
         }
 
-        return collectedContent;
+        return collectedFiles;
     }
 
-    private async isExcluded(filePath: string): Promise<boolean> {
+    private isExcluded(filePath: string): boolean {
         for (const excludeDir of this.excludeDirs) {
             if (filePath.includes(path.normalize(excludeDir) + path.sep)) return true;
         }

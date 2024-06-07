@@ -1,23 +1,14 @@
 import ConversationStorage from '../../../Core/Conversation/ConversationStorage';
-import {ChatCompletionMessageParam} from 'openai/resources';
+import ChatMessageEntity from '../../../Core/ChatMessageEntity';
 
 export default class InMemoryConversationStorage implements ConversationStorage {
-    private conversationHistory: Array<ChatCompletionMessageParam> = [];
-    private fileContent: Map<string, string> = new Map();
+    private conversationHistory: Array<ChatMessageEntity> = [];
 
-    public async saveConversation(history: Array<ChatCompletionMessageParam>): Promise<void> {
+    public async saveConversation(history: Array<ChatMessageEntity>): Promise<void> {
         this.conversationHistory = history;
     }
 
-    public async loadConversation(): Promise<Array<ChatCompletionMessageParam>> {
+    public async loadConversation(): Promise<Array<ChatMessageEntity>> {
         return this.conversationHistory;
-    }
-
-    public async saveFileContent(fileContent: Map<string, string>): Promise<void> {
-        this.fileContent = fileContent;
-    }
-
-    public async loadFileContent(): Promise<Map<string, string>> {
-        return this.fileContent;
     }
 }

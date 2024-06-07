@@ -1,4 +1,7 @@
+import ActionType from '../../ActionType';
+
 export default interface AddToConversationHistoryRequest {
-    transcription: string;
+    action: ActionType;
     fileName: string;
+    content: string;
 }

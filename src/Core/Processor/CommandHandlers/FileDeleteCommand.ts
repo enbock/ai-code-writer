@@ -1,6 +1,7 @@
 import CommandHandler from './CommandHandler';
 import CommandWords from '../CommandWords';
-import FileActionEntity from '../../Entities/FileActionEntity';
+import FileActionEntity from '../../FileActionEntity';
+import FileActionType from '../../FileActionType';
 
 export default class FileDeleteCommand implements CommandHandler {
     public canHandle(command: string): boolean {
@@ -10,7 +11,7 @@ export default class FileDeleteCommand implements CommandHandler {
     public async handle(section: Array<string>): Promise<{ comments: string[], actions: FileActionEntity[] }> {
         const filePath: string = String(section.shift()).slice(CommandWords.FILE_DELETE.length).trim();
         const fileAction: FileActionEntity = new FileActionEntity();
-        fileAction.actionType = CommandWords.FILE_DELETE;
+        fileAction.actionType = FileActionType.DELETE;
         fileAction.filePath = filePath;
         return {comments: [], actions: [fileAction]};
     }

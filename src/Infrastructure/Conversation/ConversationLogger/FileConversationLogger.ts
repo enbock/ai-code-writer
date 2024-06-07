@@ -3,26 +3,25 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export default class FileConversationLogger implements ConversationLogger {
-    private filePath: string;
-
     constructor(
-        logDirectory: string = 'logs',
-        logFileName: string = 'conversation.log'
+        private logDirectory: string = 'logs'
     ) {
-        this.filePath = path.join(logDirectory, logFileName);
+        this.getFileName(logDirectory);
 
         if (!fs.existsSync(logDirectory)) {
             fs.mkdirSync(logDirectory, {recursive: true});
         }
     }
 
-    public async logConversation(history: Array<object>): Promise<void> {
-        const logEntry: string = this.formatHistory(history);
-        await fs.promises.appendFile(this.filePath, logEntry, 'utf8');
+    private getFileName(logDirectory: string): string {
+        const date: Date = new Date();
+        const timestamp: string = date.toISOString().replace(/[:.]/g, '-').slice(0, 15);
+        const logFileName: string = `conversation-${timestamp}.log`;
+        return path.join(logDirectory, logFileName);
     }
 
-    private formatHistory(history: Array<object>): string {
-        return history.map(entry => JSON.stringify(entry)).join('\n') + '\n';
+    public async logConversation(history: object): Promise<void> {
+        const logEntry: string = JSON.stringify(history) + '\n';
+        await fs.promises.appendFile(this.getFileName(this.logDirectory), logEntry, 'utf8');
     }
 }
-

@@ -1,5 +1,5 @@
-import {ChatCompletionMessageParam} from 'openai/resources';
+import ChatMessageEntity from '../ChatMessageEntity';
 
 export default interface ChatCompletionClient {
-    completePrompt(messages: Array<ChatCompletionMessageParam>): Promise<string>;
+    completePrompt(messages: Array<ChatMessageEntity>): Promise<string>;
 }

@@ -1,6 +1,6 @@
 import CommandWords from './CommandWords';
 import CommandHandler from './CommandHandlers/CommandHandler';
-import FileActionEntity from '../Entities/FileActionEntity';
+import FileActionEntity from '../FileActionEntity';
 
 export default class GptResponseProcessor {
     constructor(

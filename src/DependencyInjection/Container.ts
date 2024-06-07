@@ -38,7 +38,7 @@ class GlobalContainer {
 
     private conversationStorage: InMemoryConversationStorage = new InMemoryConversationStorage();
     private systemPromptService: SystemPromptServiceDefinedSystemPrompt = new SystemPromptServiceDefinedSystemPrompt();
-    private conversationLogger: ConversationLogger = process.env.DEBUG_TO_FILE ? new FileConversationLogger() : new NoopConversationLogger();
+    private conversationLogger: ConversationLogger = this.config.logToFile ? new FileConversationLogger() : new NoopConversationLogger();
     private fileSystemActionHandler: FileSystemActionHandler = new FileSystemActionHandler(new Logger());
     private fileCollectorService: FileCollectorService = new FileCollector(
         '.',
@@ -99,4 +99,3 @@ class GlobalContainer {
 
 const Container: GlobalContainer = new GlobalContainer();
 export default Container;
-

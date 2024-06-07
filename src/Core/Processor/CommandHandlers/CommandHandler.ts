@@ -1,4 +1,4 @@
-import FileActionEntity from '../../Entities/FileActionEntity';
+import FileActionEntity from '../../FileActionEntity';
 
 export default interface CommandHandler {
     canHandle(command: string): boolean;

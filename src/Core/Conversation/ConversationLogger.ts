@@ -1,3 +1,3 @@
 export default interface ConversationLogger {
-    logConversation(history: Array<object>): Promise<void>;
+    logConversation(history: object): Promise<void>;
 }

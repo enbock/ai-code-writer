@@ -1,4 +1,3 @@
-import {ChatCompletionMessageParam} from 'openai/resources';
 import ConversationRequest from './ConversationRequest';
 import ConversationResponse from './ConversationResponse';
 import ChatCompletionClient from '../ChatCompletionClient';
@@ -6,9 +5,12 @@ import ConversationStorage from '../ConversationStorage';
 import ConversationLogger from '../ConversationLogger';
 import SystemPromptService from '../SystemPromptService';
 import GptResponseProcessor from '../../Processor/GptResponseProcessor';
-import FileCollectorService from '../FileCollectorService';
+import FileCollectorService, {FileData} from '../FileCollectorService';
 import AddToConversationHistoryRequest from './AddToConversationHistoryRequest';
-import FileActionEntity from '../../Entities/FileActionEntity';
+import FileActionEntity from '../../FileActionEntity';
+import ChatMessageEntity from '../../ChatMessageEntity';
+import ActionType from '../../ActionType';
+import FileActionType from '../../FileActionType';
 
 export default class ConversationUseCase {
     constructor(
@@ -21,55 +23,101 @@ export default class ConversationUseCase {
     ) {
     }
 
+    private fileActionToMessageActionMap: Map<FileActionType, ActionType> = new Map([
+        [FileActionType.WRITE, ActionType.FILE_WRITE],
+        [FileActionType.MOVE, ActionType.FILE_MOVE],
+        [FileActionType.DELETE, ActionType.FILE_DELETE]
+    ]);
+
     public async initialize(): Promise<void> {
-        const conversationHistory: Array<ChatCompletionMessageParam> = await this.conversationStorage.loadConversation();
-        const fileContent: Map<string, string> = await this.conversationStorage.loadFileContent();
+        const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
 
         if (conversationHistory.length != 0) return;
 
-        const systemPrompt: string = this.systemPromptService.getSystemPrompt();
-        conversationHistory.push({role: 'system', content: systemPrompt});
-        const filesContent: string = await this.fileCollectorService.collectFiles();
-        conversationHistory.push({role: 'user', content: filesContent});
+        const systemPrompt: ChatMessageEntity = new ChatMessageEntity();
+        systemPrompt.role = 'system';
+        systemPrompt.content = this.systemPromptService.getSystemPrompt();
+        conversationHistory.push(systemPrompt);
+        await this.conversationLogger.logConversation(systemPrompt);
+        const filesContent: Array<FileData> = await this.fileCollectorService.collectFiles();
+
+        for (const {filePath, content} of filesContent) {
+            const messageItem = new ChatMessageEntity();
+            messageItem.role = 'user';
+            messageItem.content = content;
+            messageItem.filePath = filePath;
+            messageItem.action = ActionType.FILE_WRITE;
+            conversationHistory.push(messageItem);
+            await this.conversationLogger.logConversation(messageItem);
+        }
 
         await this.conversationStorage.saveConversation(conversationHistory);
-        await this.conversationStorage.saveFileContent(fileContent);
     }
 
     public async handleConversation(request: ConversationRequest, response: ConversationResponse): Promise<void> {
-        const conversationHistory: Array<ChatCompletionMessageParam> = await this.conversationStorage.loadConversation();
-        await this.addModifiedFilesToConversation(conversationHistory);
+        const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
 
-        conversationHistory.push({role: 'user', content: request.transcription});
+        const userRequestMessage: ChatMessageEntity = new ChatMessageEntity();
+        userRequestMessage.role = 'user';
+        userRequestMessage.content = request.transcription;
+        userRequestMessage.action = ActionType.COMMENT;
+        conversationHistory.push(userRequestMessage);
+        await this.conversationLogger.logConversation(userRequestMessage);
+
         const responseText: string = await this.chatCompletionClient.completePrompt(conversationHistory);
-        conversationHistory.push({role: 'assistant', content: responseText});
-
-        await this.conversationStorage.saveConversation(conversationHistory);
-        await this.conversationLogger.logConversation(conversationHistory);
+        await this.conversationLogger.logConversation({RAW: responseText});
         const {comments, actions}: {
             comments: Array<string>,
             actions: Array<FileActionEntity>
         } = await this.gptResponseProcessor.processResponse(responseText);
+
+        for (const action of actions) {
+            this.removeOldFileFromHistory(conversationHistory, action.filePath);
+
+            const actionMessage: ChatMessageEntity = new ChatMessageEntity();
+            actionMessage.role = 'assistant';
+            actionMessage.content = action.content;
+            actionMessage.filePath = action.filePath;
+            actionMessage.action = this.fileActionToMessageActionMap.get(action.actionType) || ActionType.COMMENT;
+            conversationHistory.push(actionMessage);
+            await this.conversationLogger.logConversation(actionMessage);
+        }
+
+        const assistantAnswerMessage: ChatMessageEntity = new ChatMessageEntity();
+        assistantAnswerMessage.role = 'assistant';
+        assistantAnswerMessage.content = comments.join('\n');
+        assistantAnswerMessage.action = ActionType.COMMENT;
+        conversationHistory.push(assistantAnswerMessage);
+        await this.conversationLogger.logConversation(assistantAnswerMessage);
+
+        await this.conversationStorage.saveConversation(conversationHistory);
 
         response.comments = comments.join('\n');
         response.actions = actions;
     }
 
     public async addToConversationHistory(request: AddToConversationHistoryRequest): Promise<void> {
-        const changedFiles: Map<string, string> = await this.conversationStorage.loadFileContent();
+        const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
+        this.removeOldFileFromHistory(conversationHistory, request.fileName);
 
-        changedFiles.set(request.fileName, request.transcription);
+        const messageItem: ChatMessageEntity = new ChatMessageEntity();
+        messageItem.role = 'user';
+        messageItem.content = request.content;
+        messageItem.filePath = request.fileName;
+        messageItem.action = request.action;
+        conversationHistory.push(messageItem);
+        await this.conversationLogger.logConversation(messageItem);
 
-        await this.conversationStorage.saveFileContent(changedFiles);
+        await this.conversationStorage.saveConversation(conversationHistory);
     }
 
-    private async addModifiedFilesToConversation(conversationHistory: Array<ChatCompletionMessageParam>): Promise<void> {
-        const map: Map<string, string> = await this.conversationStorage.loadFileContent();
+    private removeOldFileFromHistory(conversationHistory: Array<ChatMessageEntity>, filePath: string): void {
+        const existingMessageIndex: number = conversationHistory.findIndex(
+            message => message.filePath === filePath
+        );
 
-        for (const fileContent of map.values()) {
-            conversationHistory.push({role: 'user', content: fileContent});
+        if (existingMessageIndex !== -1) {
+            conversationHistory.splice(existingMessageIndex, 1);
         }
-
-        await this.conversationStorage.saveFileContent(new Map());
     }
 }

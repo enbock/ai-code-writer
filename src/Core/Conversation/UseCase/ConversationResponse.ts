@@ -1,4 +1,4 @@
-import FileActionEntity from '../../Entities/FileActionEntity';
+import FileActionEntity from '../../FileActionEntity';
 
 export default interface ConversationResponse {
     comments: string;

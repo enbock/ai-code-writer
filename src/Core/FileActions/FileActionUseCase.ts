@@ -1,7 +1,7 @@
 import FileSystemHandler from './FileSystemHandler';
 import FileActionRequest from './FileActionRequest';
-import FileActionEntity from '../Entities/FileActionEntity';
-import CommandWords from '../Processor/CommandWords';
+import FileActionEntity from '../FileActionEntity';
+import FileActionType from '../FileActionType';
 
 export default class FileActionUseCase {
     constructor(
@@ -16,11 +16,11 @@ export default class FileActionUseCase {
     }
 
     private async processAction(action: FileActionEntity): Promise<void> {
-        if (action.actionType === CommandWords.FILE_WRITE) {
+        if (action.actionType === FileActionType.WRITE) {
             await this.fileSystemHandler.handleWriteFile(action.filePath, action.content);
-        } else if (action.actionType === CommandWords.FILE_MOVE) {
+        } else if (action.actionType === FileActionType.MOVE) {
             await this.fileSystemHandler.handleMoveFile(action.filePath, action.targetFilePath);
-        } else if (action.actionType === CommandWords.FILE_DELETE) {
+        } else if (action.actionType === FileActionType.DELETE) {
             await this.fileSystemHandler.handleDeleteFile(action.filePath);
         }
     }

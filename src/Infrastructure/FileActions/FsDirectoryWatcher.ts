@@ -1,6 +1,7 @@
 import DirectoryWatcher from '../../Core/FileActions/DirectoryWatcher';
 import * as fs from 'fs';
 import * as path from 'path';
+import ActionType from '../../Core/ActionType';
 
 export default class FsDirectoryWatcher implements DirectoryWatcher {
     private watchers: Array<fs.FSWatcher> = [];
@@ -31,11 +32,11 @@ export default class FsDirectoryWatcher implements DirectoryWatcher {
         this.watching = true;
     }
 
-    public onChange(callback: (action: string, fileName: string) => void): void {
+    public onChange(callback: (action: ActionType, filePath: string, content: string) => void): void {
         this.callback = callback;
     }
 
-    private callback: (action: string, fileName: string) => void = () => {
+    private callback: (action: ActionType, filePath: string, content: string) => void = () => {
     };
 
     private async isExcluded(filePath: string): Promise<boolean> {
@@ -79,13 +80,15 @@ export default class FsDirectoryWatcher implements DirectoryWatcher {
             if (eventType === 'rename') {
                 fs.stat(filePath, (err, stats) => {
                     if (err) {
-                        this.callback(`--- ${relativeFilePath}`, relativeFilePath);
+                        this.callback(ActionType.FILE_DELETE, relativeFilePath, '');
                     } else if (stats.isFile()) {
-                        this.callback(`<<< ${relativeFilePath}\n${fs.readFileSync(filePath, 'utf8')}`, relativeFilePath);
+                        const content = fs.readFileSync(filePath, 'utf8');
+                        this.callback(ActionType.FILE_WRITE, relativeFilePath, content);
                     }
                 });
             } else if (eventType === 'change') {
-                this.callback(`<<< ${relativeFilePath}\n${fs.readFileSync(filePath, 'utf8')}`, relativeFilePath);
+                const content = fs.readFileSync(filePath, 'utf8');
+                this.callback(ActionType.FILE_WRITE, relativeFilePath, content);
             }
         });
 

@@ -16,7 +16,7 @@ konfiguriert werden können:
 
 - **Einschlussmuster**: `INCLUDE_PATTERNS` (Standard: `*.ts,*.json,*.yml,*.yaml,*.md,*.js,.env.dist`)
 - **Auszuschließende Verzeichnisse**: `EXCLUDE_DIRS` (Standard: `node_modules,build,dist,.git`)
-- **Auszuschließende Dateien**: `EXCLUDE_FILES` (Standard: `package-lock.json,.*`)
+- **Auszuschließende Dateien**: `EXCLUDE_FILES` (Standard: `package-lock.json,.?*`)
 
 ## Optionale Umgebungsvariablen
 
@@ -30,14 +30,16 @@ Zusätzlich zur obligatorischen Variable `OPENAI_API_KEY` unterstützt die Anwen
 - **EXCLUDE_DIRS**: Verzeichnisse, die von der Verarbeitung ausgeschlossen werden sollen (
   Standard: `node_modules,build,dist,.git`).
 - **EXCLUDE_FILES**: Dateien, die von der Verarbeitung ausgeschlossen werden sollen (Standard: `package-lock.json,.*`).
+- **DEBUG_TO_FILE**: Wenn auf `true` gesetzt, werden die Unterhaltungen in einer Datei protokolliert (
+  Standard: `false`).
 
 ## Voraussetzungen
 
 - **SOX (Sound eXchange)**: Diese Anwendung erfordert SOX für die Audioaufnahme. Installieren Sie SOX über Ihren
   Paketmanager:
-  - **macOS**: `brew install sox`
-  - **Windows**: Laden Sie den Installer von der [offiziellen Website](http://sox.sourceforge.net/) herunter
-  - **Linux**: Verwenden Sie den Paketmanager Ihrer Distribution, z.B. `apt-get install sox`
+    - **macOS**: `brew install sox`
+    - **Windows**: Laden Sie den Installer von der [offiziellen Website](http://sox.sourceforge.net/) herunter
+    - **Linux**: Verwenden Sie den Paketmanager Ihrer Distribution, z.B. `apt-get install sox`
 
 ## Verwendung
 
@@ -86,4 +88,3 @@ Endre Bock <dev@itbock.de>
 - [Leer en español](./README_es.md)
 - [阅读中文](./README_zh.md)
 - [Lire en français](./README_fr.md)
-

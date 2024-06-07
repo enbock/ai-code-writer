@@ -7,7 +7,8 @@ import FileActionUseCase from '../Core/FileActions/FileActionUseCase';
 import FileActionRequest from './FileActionRequest';
 import DirectoryWatcher from '../Core/FileActions/DirectoryWatcher';
 import AddToConversationHistoryRequest from './AddToConversationHistoryRequest';
-import FileActionEntity from '../Core/Entities/FileActionEntity';
+import FileActionEntity from '../Core/FileActionEntity';
+import ActionType from '../Core/ActionType';
 
 export default class StartController {
     private paused: boolean = false;
@@ -88,13 +89,14 @@ export default class StartController {
         this.directoryWatcher.resumeWatching();
     }
 
-    private async handleDirectoryChange(action: string, fileName: string): Promise<void> {
+    private async handleDirectoryChange(action: ActionType, filePath: string, content: string): Promise<void> {
         const addToConversationHistoryRequest: AddToConversationHistoryRequest = new AddToConversationHistoryRequest();
-        addToConversationHistoryRequest.transcription = `${action} ${fileName}`;
-        addToConversationHistoryRequest.fileName = fileName;
+        addToConversationHistoryRequest.action = action;
+        addToConversationHistoryRequest.fileName = filePath;
+        addToConversationHistoryRequest.content = content;
 
         await this.gptConversationUseCase.addToConversationHistory(addToConversationHistoryRequest);
-        console.log('Datei geändert:', fileName);
+        console.log('Datei geändert:', '(' + action + ')' + filePath);
     }
 
     private async handleKeyPress(key: Buffer): Promise<void> {

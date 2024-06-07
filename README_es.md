@@ -17,7 +17,7 @@ través de variables de entorno:
 
 - **Patrones de inclusión**: `INCLUDE_PATTERNS` (predeterminado: `*.ts,*.json,*.yml,*.yaml,*.md,*.js,.env.dist`)
 - **Directorios excluidos**: `EXCLUDE_DIRS` (predeterminado: `node_modules,build,dist,.git`)
-- **Archivos excluidos**: `EXCLUDE_FILES` (predeterminado: `package-lock.json,.*`)
+- **Archivos excluidos**: `EXCLUDE_FILES` (predeterminado: `package-lock.json,.?*`)
 
 ## Variables de entorno opcionales
 
@@ -30,14 +30,15 @@ Además de la variable obligatoria `OPENAI_API_KEY`, la aplicación admite varia
   predeterminado: `*.ts,*.json,*.yml,*.yaml,*.md,*.js,.env.dist`).
 - **EXCLUDE_DIRS**: Directorios que se excluirán del procesamiento (predeterminado: `node_modules,build,dist,.git`).
 - **EXCLUDE_FILES**: Archivos que se excluirán del procesamiento (predeterminado: `package-lock.json,.*`).
+- **DEBUG_TO_FILE**: Si se establece en `true`, registra la conversación en un archivo (predeterminado: `false`).
 
 ## Requisitos previos
 
 - **SOX (Sound eXchange)**: Esta aplicación requiere SOX para la grabación de audio. Instale SOX a través de su gestor
   de paquetes:
-  - **macOS**: `brew install sox`
-  - **Windows**: Descargue el instalador desde el [sitio web oficial](http://sox.sourceforge.net/)
-  - **Linux**: Use el gestor de paquetes de su distribución, por ejemplo, `apt-get install sox`
+    - **macOS**: `brew install sox`
+    - **Windows**: Descargue el instalador desde el [sitio web oficial](http://sox.sourceforge.net/)
+    - **Linux**: Use el gestor de paquetes de su distribución, por ejemplo, `apt-get install sox`
 
 ## Uso
 
@@ -86,4 +87,3 @@ Endre Bock <dev@itbock.de>
 - [Leer en alemán](./README_de.md)
 - [阅读中文](./README_zh.md)
 - [Lire en français](./README_fr.md)
-

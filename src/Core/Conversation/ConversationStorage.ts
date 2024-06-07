@@ -1,11 +1,7 @@
-import {ChatCompletionMessageParam} from 'openai/resources';
+import ChatMessageEntity from '../ChatMessageEntity';
 
 export default interface ConversationStorage {
-    saveConversation(history: Array<ChatCompletionMessageParam>): Promise<void>;
+    saveConversation(history: Array<ChatMessageEntity>): Promise<void>;
 
-    loadConversation(): Promise<Array<ChatCompletionMessageParam>>;
-
-    saveFileContent(fileContent: Map<string, string>): Promise<void>;
-
-    loadFileContent(): Promise<Map<string, string>>;
+    loadConversation(): Promise<Array<ChatMessageEntity>>;
 }

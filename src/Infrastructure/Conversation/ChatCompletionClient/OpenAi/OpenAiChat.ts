@@ -1,9 +1,9 @@
 import ChatCompletionClient from '../../../../Core/Conversation/ChatCompletionClient';
+import ChatMessageEntity from '../../../../Core/ChatMessageEntity';
 import {OpenAI} from 'openai';
-import {ChatCompletionMessageParam} from 'openai/resources';
 import LoggerService from '../../../../Core/Logger/LoggerService';
 import {Stream} from 'openai/streaming';
-import {ChatCompletionChunk} from 'openai/src/resources/chat/completions';
+import {ChatCompletionChunk, ChatCompletionMessageParam} from 'openai/src/resources/chat/completions';
 
 export default class OpenAiChat implements ChatCompletionClient {
     constructor(
@@ -13,12 +13,13 @@ export default class OpenAiChat implements ChatCompletionClient {
     ) {
     }
 
-    public async completePrompt(messages: Array<ChatCompletionMessageParam>): Promise<string> {
+    public async completePrompt(messages: Array<ChatMessageEntity>): Promise<string> {
         let responseContent: string = '';
         let inputTokens: number = 0;
         let outputTokens: number = 0;
 
         try {
+            const formattedMessages: Array<ChatCompletionMessageParam> = this.aggregateMessages(messages);
             const responseStream: Stream<ChatCompletionChunk> = await this.openai.chat.completions.create({
                 stream: true,
                 model: 'gpt-4o',
@@ -27,10 +28,10 @@ export default class OpenAiChat implements ChatCompletionClient {
                 frequency_penalty: 0,
                 temperature: this.temperature,
                 top_p: 1,
-                messages: messages
+                messages: formattedMessages
             });
 
-            inputTokens = messages.reduce(
+            inputTokens = formattedMessages.reduce(
                 (count: number, message: ChatCompletionMessageParam) => count + (message.content ? this.getTokenCount(
                     typeof message.content === 'string' ? message.content : message.content.join(' ')
                 ) : 0), 0
@@ -59,6 +60,35 @@ export default class OpenAiChat implements ChatCompletionClient {
             this.logger.logError('Progress: Failed\n');
             throw error;
         }
+    }
+
+    private aggregateMessages(messages: Array<ChatMessageEntity>): Array<ChatCompletionMessageParam> {
+        const aggregatedMessages: Array<ChatCompletionMessageParam> = [];
+        let currentContent: string = '';
+        let currentRole: string = '';
+
+        messages.forEach((message: ChatMessageEntity, index: number): void => {
+            const content: string =
+                (message.role != 'system' ? message.action + ' ' : '') +
+                (message.filePath ? `${message.filePath}\n${message.content}` : '\n' + message.content)
+            ;
+
+            if (currentRole === message.role) {
+                currentContent += '\n' + content;
+            } else {
+                if (currentContent) {
+                    aggregatedMessages.push(<ChatCompletionMessageParam>{role: currentRole, content: currentContent});
+                }
+                currentRole = message.role;
+                currentContent = content;
+            }
+
+            if (index === messages.length - 1 && currentContent) {
+                aggregatedMessages.push(<ChatCompletionMessageParam>{role: currentRole, content: currentContent});
+            }
+        });
+
+        return aggregatedMessages;
     }
 
     private getTokenCount(text: string): number {

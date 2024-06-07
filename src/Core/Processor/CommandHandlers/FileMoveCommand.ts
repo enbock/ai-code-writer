@@ -1,6 +1,7 @@
 import CommandHandler from './CommandHandler';
 import CommandWords from '../CommandWords';
-import FileActionEntity from '../../Entities/FileActionEntity';
+import FileActionEntity from '../../FileActionEntity';
+import FileActionType from '../../FileActionType';
 
 export default class FileMoveCommand implements CommandHandler {
     public canHandle(command: string): boolean {
@@ -11,7 +12,7 @@ export default class FileMoveCommand implements CommandHandler {
         const commandLine: string = String(section.shift());
         const [source, destination]: Array<string> = commandLine.slice(CommandWords.FILE_MOVE.length).trim().split(/\s+/);
         const fileAction: FileActionEntity = new FileActionEntity();
-        fileAction.actionType = CommandWords.FILE_MOVE;
+        fileAction.actionType = FileActionType.MOVE;
         fileAction.filePath = source;
         fileAction.targetFilePath = destination;
         return {comments: [], actions: [fileAction]};

@@ -29,15 +29,16 @@ optionnelles :
 - **INCLUDE_PATTERNS** : Modèles pour les fichiers à inclure dans le traitement (par
   défaut : `*.ts,*.json,*.yml,*.yaml,*.md,*.js,.env.dist`).
 - **EXCLUDE_DIRS** : Répertoires à exclure du traitement (par défaut : `node_modules,build,dist,.git`).
-- **EXCLUDE_FILES** : Fichiers à exclure du traitement (par défaut : `package-lock.json,.*`).
+- **EXCLUDE_FILES** : Fichiers à exclure du traitement (par défaut : `package-lock.json,.?*`).
+- **DEBUG_TO_FILE** : Si défini sur `true`, enregistre la conversation dans un fichier (par défaut : `false`).
 
 ## Prérequis
 
 - **SOX (Sound eXchange)** : Cette application nécessite SOX pour l'enregistrement audio. Installez SOX via votre
   gestionnaire de paquets :
-  - **macOS** : `brew install sox`
-  - **Windows** : Téléchargez l'installateur depuis le [site officiel](http://sox.sourceforge.net/)
-  - **Linux** : Utilisez le gestionnaire de paquets de votre distribution, par exemple, `apt-get install sox`
+    - **macOS** : `brew install sox`
+    - **Windows** : Téléchargez l'installateur depuis le [site officiel](http://sox.sourceforge.net/)
+    - **Linux** : Utilisez le gestionnaire de paquets de votre distribution, par exemple, `apt-get install sox`
 
 ## Utilisation
 

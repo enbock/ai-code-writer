@@ -28,14 +28,15 @@ In addition to the mandatory `OPENAI_API_KEY`, the application supports several 
 - **INCLUDE_PATTERNS**: Patterns for files to include in processing (
   default: `*.ts,*.json,*.yml,*.yaml,*.md,*.js,.env.dist`).
 - **EXCLUDE_DIRS**: Directories to exclude from processing (default: `node_modules,build,dist,.git`).
-- **EXCLUDE_FILES**: Files to exclude from processing (default: `package-lock.json,.*`).
+- **EXCLUDE_FILES**: Files to exclude from processing (default: `package-lock.json,.?*`).
+- **DEBUG_TO_FILE**: If set to `true`, logs the conversation to a file (default: `false`).
 
 ## Prerequisites
 
 - **SOX (Sound eXchange)**: This application requires SOX for audio recording. Install SOX via your package manager:
-  - **macOS**: `brew install sox`
-  - **Windows**: Download the installer from the [official website](http://sox.sourceforge.net/)
-  - **Linux**: Use your distribution's package manager, e.g., `apt-get install sox`
+    - **macOS**: `brew install sox`
+    - **Windows**: Download the installer from the [official website](http://sox.sourceforge.net/)
+    - **Linux**: Use your distribution's package manager, e.g., `apt-get install sox`
 
 ## Usage
 
@@ -81,4 +82,3 @@ Endre Bock <dev@itbock.de>
 - [Leer en español](./README_es.md)
 - [阅读中文](./README_zh.md)
 - [Lire en français](./README_fr.md)
-
