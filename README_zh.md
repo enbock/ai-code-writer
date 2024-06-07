@@ -72,7 +72,7 @@ MIT - [LICENSE](./LICENSE)
 
 ## 作者
 
-Endre Bock <dev@itbock.de>
+Endre Bock
 
 ## 语言
 

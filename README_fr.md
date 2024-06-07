@@ -80,7 +80,7 @@ MIT - [LICENSE](./LICENSE)
 
 ## Auteur
 
-Endre Bock <dev@itbock.de>
+Endre Bock
 
 ## Langues
 

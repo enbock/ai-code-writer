@@ -75,7 +75,7 @@ MIT - [LICENSE](./LICENSE)
 
 ## Author
 
-Endre Bock <dev@itbock.de>
+Endre Bock
 
 ## Languages
 
