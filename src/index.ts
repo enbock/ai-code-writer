@@ -19,6 +19,4 @@ class App {
     }
 }
 
-console.log('Version: 2.0.3');
-
 App.run().then();
