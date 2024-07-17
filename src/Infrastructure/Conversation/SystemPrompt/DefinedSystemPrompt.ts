@@ -52,6 +52,7 @@ Output Rules:
 * Files that are no longer needed must be deleted (explicit delete output is necessary).
 * Consider relationships between files and adjust import paths if necessary.
 * Other output forms than "output a comment," "output a file," or "delete a file" are prohibited.
+* **It is strictly prohibited to abbreviate or truncate any file content. Always provide the complete and full content of files.**
 
 Your output will be processed as follows:
 1. Comments will be read aloud.
