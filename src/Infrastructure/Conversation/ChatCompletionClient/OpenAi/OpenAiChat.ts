@@ -4,7 +4,6 @@ import {OpenAI} from 'openai';
 import LoggerService from '../../../../Core/Logger/LoggerService';
 import {Stream} from 'openai/streaming';
 import {ChatCompletionChunk, ChatCompletionMessageParam} from 'openai/src/resources/chat/completions';
-import ActionType from '../../../../Core/ActionType';
 
 export default class OpenAiChat implements ChatCompletionClient {
     constructor(
@@ -49,7 +48,7 @@ export default class OpenAiChat implements ChatCompletionClient {
                 progress += Buffer.byteLength(content);
                 outputTokens += this.getTokenCount(content);
 
-                if (progress >= 1024) {
+                if (progress >= 256) {
                     this.logger.logProgress('.');
                     progress = 0;
                 }
@@ -72,12 +71,7 @@ export default class OpenAiChat implements ChatCompletionClient {
         messages.forEach((message: ChatMessageEntity, index: number): void => {
             const content: string =
                 (message.role != 'system' ? message.action + ' ' : '') +
-                (message.filePath ? `${message.filePath}\n${
-                    message.content
-                        .replace(ActionType.COMMENT + ' ', '^°µ|' + ActionType.COMMENT + ' ')
-                        .replace(ActionType.FILE_WRITE + ' ', '^°µ|' + ActionType.FILE_WRITE + ' ')
-                        .replace(ActionType.FILE_DELETE + ' ', '^°µ|' + ActionType.FILE_DELETE + ' ')
-                }` : '\n' + message.content)
+                (message.filePath ? `${message.filePath}\n${message.content}` : '\n' + message.content)
             ;
 
             if (currentRole === message.role) {

@@ -1,6 +1,6 @@
-import CommandWords from './CommandWords';
 import CommandHandler from './CommandHandlers/CommandHandler';
 import FileActionEntity from '../FileActionEntity';
+import ActionType from '../ActionType';
 
 export default class GptResponseProcessor {
     constructor(
@@ -54,9 +54,9 @@ export default class GptResponseProcessor {
 
     private isCommand(line: string): boolean {
         return (
-            line.startsWith(CommandWords.COMMENT) ||
-            line.startsWith(CommandWords.FILE_WRITE) ||
-            line.startsWith(CommandWords.FILE_DELETE)
+            line.startsWith(ActionType.COMMENT) ||
+            line.startsWith(ActionType.FILE_WRITE) ||
+            line.startsWith(ActionType.FILE_DELETE)
         );
     }
 
@@ -68,7 +68,7 @@ export default class GptResponseProcessor {
     private ensureInitialCommandWord(response: string): string {
         const lines: Array<string> = response.split('\n');
         if (lines.length > 0 && !this.isCommand(lines[0])) {
-            lines[0] = `${CommandWords.COMMENT}${lines[0]}`;
+            lines[0] = `${ActionType.COMMENT}${lines[0]}`;
         }
         return lines.join('\n');
     }

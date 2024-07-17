@@ -1,7 +1,7 @@
 enum ActionType {
-    COMMENT = '===',
-    FILE_WRITE = '<<<',
-    FILE_DELETE = '---'
+    COMMENT = 'µ==',
+    FILE_WRITE = 'µ<<',
+    FILE_DELETE = 'µ--'
 }
 
 export default ActionType;
