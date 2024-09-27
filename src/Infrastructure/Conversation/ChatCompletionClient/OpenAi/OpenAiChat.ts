@@ -10,7 +10,8 @@ export default class OpenAiChat implements ChatCompletionClient {
         private openai: OpenAI,
         private temperature: number,
         private logger: LoggerService,
-        private model: string
+        private model: string,
+        private maxTokens: number
     ) {
     }
 
@@ -24,7 +25,7 @@ export default class OpenAiChat implements ChatCompletionClient {
             const responseStream: Stream<ChatCompletionChunk> = await this.openai.chat.completions.create({
                 stream: true,
                 model: this.model,
-                max_tokens: 4095,
+                max_tokens: this.maxTokens,
                 presence_penalty: 0,
                 frequency_penalty: 0,
                 temperature: this.temperature,

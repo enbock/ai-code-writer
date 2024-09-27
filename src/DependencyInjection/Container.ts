@@ -50,7 +50,8 @@ class GlobalContainer {
         this.openAi,
         this.config.openAiChatTemperature,
         this.logger,
-        this.config.openAiChatModel
+        this.config.openAiChatModel,
+        this.config.maxTokens
     );
     private audioTransformClientOpenAi: AudioTransformClientOpenAiAudio = new AudioTransformClientOpenAiAudio(
         'https://api.openai.com/v1/audio/speech',
