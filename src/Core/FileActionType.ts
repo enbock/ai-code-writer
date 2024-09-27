@@ -1,7 +1,8 @@
 enum FileActionType {
-    WRITE = 'WRITE',
-    MOVE = 'MOVE',
-    DELETE = 'DELETE'
+    WRITE,
+    MOVE,
+    DELETE,
+    READ
 }
 
 export default FileActionType;

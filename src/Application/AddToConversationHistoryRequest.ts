@@ -1,8 +1,9 @@
 import AddToConversationHistoryRequestInterface from '../Core/Conversation/UseCase/AddToConversationHistoryRequest';
-import ActionType from '../Core/ActionType';
+import {MessageRoles} from '../Core/ChatMessageEntity';
 
 export default class AddToConversationHistoryRequest implements AddToConversationHistoryRequestInterface {
-    public action: ActionType = ActionType.COMMENT;
+    public callId: string = '';
     public fileName: string = '';
     public content: string = '';
+    public role: MessageRoles = 'user';
 }

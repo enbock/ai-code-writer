@@ -1,6 +1,6 @@
-import FileActionEntity from '../../FileActionEntity';
+import ChatResultEntity from './ChatResultEntity';
 
 export default interface ConversationResponse {
-    comments: string;
-    actions: Array<FileActionEntity>;
+    conversationComplete: boolean;
+    result: ChatResultEntity;
 }

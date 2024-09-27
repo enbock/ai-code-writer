@@ -1,7 +1,8 @@
-import ActionType from '../../ActionType';
+import {MessageRoles} from '../../ChatMessageEntity';
 
 export default interface AddToConversationHistoryRequest {
-    action: ActionType;
+    callId: string;
     fileName: string;
     content: string;
+    role: MessageRoles;
 }

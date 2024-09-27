@@ -1,32 +1,23 @@
 import ConversationRequest from './ConversationRequest';
 import ConversationResponse from './ConversationResponse';
-import ChatCompletionClient from '../ChatCompletionClient';
+import ChatClient from '../ChatClient';
 import ConversationStorage from '../ConversationStorage';
 import ConversationLogger from '../ConversationLogger';
 import SystemPromptService from '../SystemPromptService';
-import GptResponseProcessor from '../../Processor/GptResponseProcessor';
 import FileCollectorService, {FileData} from '../FileCollectorService';
 import AddToConversationHistoryRequest from './AddToConversationHistoryRequest';
-import FileActionEntity from '../../FileActionEntity';
 import ChatMessageEntity from '../../ChatMessageEntity';
-import ActionType from '../../ActionType';
-import FileActionType from '../../FileActionType';
+import ChatResultEntity from './ChatResultEntity';
 
 export default class ConversationUseCase {
     constructor(
-        private chatCompletionClient: ChatCompletionClient,
+        private chatCompletionClient: ChatClient,
         private conversationStorage: ConversationStorage,
         private conversationLogger: ConversationLogger,
         private systemPromptService: SystemPromptService,
-        private gptResponseProcessor: GptResponseProcessor,
         private fileCollectorService: FileCollectorService
     ) {
     }
-
-    private fileActionToMessageActionMap: Map<FileActionType, ActionType> = new Map([
-        [FileActionType.WRITE, ActionType.FILE_WRITE],
-        [FileActionType.DELETE, ActionType.FILE_DELETE]
-    ]);
 
     public async initialize(): Promise<void> {
         const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
@@ -42,10 +33,9 @@ export default class ConversationUseCase {
 
         for (const {filePath, content} of filesContent) {
             const messageItem = new ChatMessageEntity();
-            messageItem.role = 'user';
-            messageItem.content = content;
+            messageItem.role = 'system';
+            messageItem.content = 'Changed file ' + filePath + ':\n```\n' + content + '\n```';
             messageItem.filePath = filePath;
-            messageItem.action = ActionType.FILE_WRITE;
             conversationHistory.push(messageItem);
             await this.conversationLogger.logConversation(messageItem);
         }
@@ -53,46 +43,33 @@ export default class ConversationUseCase {
         await this.conversationStorage.saveConversation(conversationHistory);
     }
 
-    public async handleConversation(request: ConversationRequest, response: ConversationResponse): Promise<void> {
+    public async addUserMessageToConversation(request: ConversationRequest): Promise<void> {
         const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
 
         const userRequestMessage: ChatMessageEntity = new ChatMessageEntity();
         userRequestMessage.role = 'user';
         userRequestMessage.content = request.transcription;
-        userRequestMessage.action = ActionType.COMMENT;
         conversationHistory.push(userRequestMessage);
+
         await this.conversationLogger.logConversation(userRequestMessage);
+        await this.conversationStorage.saveConversation(conversationHistory);
+    }
 
-        const responseText: string = await this.chatCompletionClient.completePrompt(conversationHistory);
-        await this.conversationLogger.logConversation({RAW: responseText});
-        const {comments, actions}: {
-            comments: Array<string>,
-            actions: Array<FileActionEntity>
-        } = await this.gptResponseProcessor.processResponse(responseText);
-
-        for (const action of actions) {
-            this.removeOldFileFromHistory(conversationHistory, action.filePath);
-
-            const actionMessage: ChatMessageEntity = new ChatMessageEntity();
-            actionMessage.role = 'assistant';
-            actionMessage.content = action.content;
-            actionMessage.filePath = action.filePath;
-            actionMessage.action = this.fileActionToMessageActionMap.get(action.actionType) || ActionType.COMMENT;
-            conversationHistory.push(actionMessage);
-            await this.conversationLogger.logConversation(actionMessage);
-        }
+    public async continueConversation(response: ConversationResponse): Promise<void> {
+        const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
+        const chatResult: ChatResultEntity = await this.chatCompletionClient.completePrompt(conversationHistory);
+        await this.conversationLogger.logConversation({chatResult: chatResult});
 
         const assistantAnswerMessage: ChatMessageEntity = new ChatMessageEntity();
         assistantAnswerMessage.role = 'assistant';
-        assistantAnswerMessage.content = comments.join('\n');
-        assistantAnswerMessage.action = ActionType.COMMENT;
+        assistantAnswerMessage.content = chatResult.content;
+        assistantAnswerMessage.toolCalls = chatResult.toolCalls;
         conversationHistory.push(assistantAnswerMessage);
-        await this.conversationLogger.logConversation(assistantAnswerMessage);
 
         await this.conversationStorage.saveConversation(conversationHistory);
 
-        response.comments = comments.join('\n');
-        response.actions = actions;
+        response.result = chatResult;
+        response.conversationComplete = chatResult.conversationComplete;
     }
 
     public async addToConversationHistory(request: AddToConversationHistoryRequest): Promise<void> {
@@ -100,23 +77,59 @@ export default class ConversationUseCase {
         this.removeOldFileFromHistory(conversationHistory, request.fileName);
 
         const messageItem: ChatMessageEntity = new ChatMessageEntity();
-        messageItem.role = 'user';
+        messageItem.callId = request.callId;
+        messageItem.role = request.role;
         messageItem.content = request.content;
         messageItem.filePath = request.fileName;
-        messageItem.action = request.action;
         conversationHistory.push(messageItem);
-        await this.conversationLogger.logConversation(messageItem);
 
+        await this.conversationLogger.logConversation(messageItem);
         await this.conversationStorage.saveConversation(conversationHistory);
     }
 
-    private removeOldFileFromHistory(conversationHistory: Array<ChatMessageEntity>, filePath: string): void {
+    private removeOldFileFromHistory(
+        conversationHistory: Array<ChatMessageEntity>,
+        filePath: string
+    ): void {
         const existingMessageIndex: number = conversationHistory.findIndex(
             message => message.filePath === filePath
         );
+        if (existingMessageIndex == -1) return;
 
-        if (existingMessageIndex !== -1) {
-            conversationHistory.splice(existingMessageIndex, 1);
+        const deletedMessage: ChatMessageEntity = conversationHistory.splice(
+                existingMessageIndex,
+                1
+            )[0]
+        ;
+        this.removeCallFromResultMessages(deletedMessage, conversationHistory);
+        this.removeCallFromMessagesToolCalls(deletedMessage, conversationHistory);
+
+    }
+
+    private removeCallFromResultMessages(
+        deletedMessage: ChatMessageEntity,
+        conversationHistory: Array<ChatMessageEntity>
+    ): void {
+        for (const deletedCall of deletedMessage.toolCalls) {
+            const callId: string = deletedCall.id;
+            const index: number = conversationHistory.findIndex(c => c.callId == callId);
+
+            if (index == -1) continue;
+
+            conversationHistory.splice(index, 1);
+        }
+    }
+
+    private removeCallFromMessagesToolCalls(
+        deletedMessage: ChatMessageEntity,
+        conversationHistory: Array<ChatMessageEntity>
+    ): void {
+        for (const message of conversationHistory) {
+            const index: number = message.toolCalls.findIndex(c => c.id == deletedMessage.callId);
+
+            if (index == -1) continue;
+
+            message.toolCalls.splice(index, 1);
         }
     }
 }

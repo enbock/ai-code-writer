@@ -1,7 +1,7 @@
 import ConversationResponseInterface from '../Core/Conversation/UseCase/ConversationResponse';
-import FileActionEntity from '../Core/FileActionEntity';
+import ChatResultEntity from '../Core/Conversation/UseCase/ChatResultEntity';
 
 export default class ConversationResponse implements ConversationResponseInterface {
-    public comments: string = '';
-    public actions: Array<FileActionEntity> = [];
+    public conversationComplete: boolean = false;
+    public result: ChatResultEntity = new ChatResultEntity();
 }

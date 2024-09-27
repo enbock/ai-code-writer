@@ -9,7 +9,6 @@ import InMemoryConversationStorage
 import SystemPromptServiceDefinedSystemPrompt from '../Infrastructure/Conversation/SystemPrompt/DefinedSystemPrompt';
 import NoopConversationLogger from '../Infrastructure/Conversation/ConversationLogger/NoopConversationLogger';
 import FileSystemActionHandler from '../Infrastructure/FileActions/FileSystemActionHandler';
-import GptResponseProcessor from '../Core/Processor/GptResponseProcessor';
 import FileCollectorService from '../Core/Conversation/FileCollectorService';
 import FileCollector from '../Infrastructure/Conversation/FileCollector/FileCollector';
 import FileActionUseCase from '../Core/FileActions/FileActionUseCase';
@@ -19,14 +18,16 @@ import AudioUseCase from '../Core/Audio/AudioUseCase';
 import NodeAudioRecorderConfig from '../Infrastructure/AudioRecorder/Node/NodeAudioRecorderConfig';
 import ConversationUseCase from '../Core/Conversation/UseCase/ConversationUseCase';
 import AudioRecorder from '../Core/Audio/AudioRecorder';
-import CommandHandler from '../Core/Processor/CommandHandlers/CommandHandler';
-import CommentCommand from '../Core/Processor/CommandHandlers/CommentCommand';
-import FileWriteCommand from '../Core/Processor/CommandHandlers/FileWriteCommand';
-import FileDeleteCommand from '../Core/Processor/CommandHandlers/FileDeleteCommand';
 import Config from './Config';
 import Logger from '../Infrastructure/Logger/Logger';
 import FileConversationLogger from '../Infrastructure/Conversation/ConversationLogger/FileConversationLogger';
 import ConversationLogger from '../Core/Conversation/ConversationLogger';
+import PauseUseCase from '../Core/Conversation/PauseUseCase/PauseUseCase';
+import StateStorageMemory from '../Infrastructure/StateStorage/Memory/Memory';
+import StateStorage from '../Core/StateStorage';
+import FileActionExecutor from '../Application/Task/FileActionExecutor';
+import ToolCallConverter from '../Infrastructure/Conversation/ChatCompletionClient/OpenAi/ToolCallConverter';
+import MessageEncoder from '../Infrastructure/Conversation/ChatCompletionClient/OpenAi/MessageEncoder';
 
 class GlobalContainer {
     private config: Config = new Config();
@@ -51,7 +52,12 @@ class GlobalContainer {
         this.config.openAiChatTemperature,
         this.logger,
         this.config.openAiChatModel,
-        this.config.maxTokens
+        this.config.maxTokens,
+        new ToolCallConverter(
+            this.logger
+        ),
+        new MessageEncoder(),
+        this.conversationLogger
     );
     private audioTransformClientOpenAi: AudioTransformClientOpenAiAudio = new AudioTransformClientOpenAiAudio(
         'https://api.openai.com/v1/audio/speech',
@@ -75,25 +81,27 @@ class GlobalContainer {
         this.config.excludeDirs,
         this.config.excludeFiles
     );
-    private commandHandlers: Array<CommandHandler> = [
-        new CommentCommand(),
-        new FileWriteCommand(),
-        new FileDeleteCommand()
-    ];
-    private gptResponseProcessor: GptResponseProcessor = new GptResponseProcessor(this.commandHandlers);
     private conversationUseCase: ConversationUseCase = new ConversationUseCase(
         this.conversationChatCompletionClientOpenAiChat,
         this.conversationStorage,
         this.conversationLogger,
         this.systemPromptService,
-        this.gptResponseProcessor,
         this.fileCollectorService
+    );
+    private stateStorage: StateStorage = new StateStorageMemory();
+    private pauseUseCase: PauseUseCase = new PauseUseCase(
+        this.stateStorage
+    );
+    private fileActionExecutor: FileActionExecutor = new FileActionExecutor(
+        this.fileActionUseCase,
+        this.conversationUseCase
     );
     public startController: StartController = new StartController(
         this.audioUseCase,
         this.conversationUseCase,
-        this.fileActionUseCase,
-        this.directoryWatcher
+        this.directoryWatcher,
+        this.pauseUseCase,
+        this.fileActionExecutor
     );
 }
 
