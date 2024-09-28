@@ -9,12 +9,14 @@ export default class ToolCallConverter {
         readFile: FileActionType.READ,
         writeFile: FileActionType.WRITE,
         deleteFile: FileActionType.DELETE,
-        moveFile: FileActionType.MOVE
+        moveFile: FileActionType.MOVE,
+        readAllFiles: FileActionType.READ_ALL_FILES
     };
     private commandActionMap: Record<string, CommandActionType> = {
         pauseCommand: CommandActionType.PAUSE,
         suspendCommand: CommandActionType.SUSPEND,
-        resumeCommand: CommandActionType.RESUME
+        resumeCommand: CommandActionType.RESUME,
+        exitCommand: CommandActionType.EXIT_PROGRAMM
     };
 
     constructor(

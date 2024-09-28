@@ -33,7 +33,6 @@ export default class ConversationUseCase {
         systemPrompt.role = 'system';
         systemPrompt.content = this.systemPromptService.getSystemPrompt(this.config.magicWord);
         conversationHistory.push(systemPrompt);
-        // await this.conversationLogger.logConversation(systemPrompt);
 
         await this.conversationStorage.saveConversation(conversationHistory);
     }
@@ -42,8 +41,7 @@ export default class ConversationUseCase {
         const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
         const filesContents: Array<FileData> = await this.fileCollectorService.collectFiles();
 
-        await this.fileTask.addFileContentsToInitialConversation(filesContents, conversationHistory);
-        // this.fileTask.addFileListToInitialConversation(filesContents, conversationHistory);
+        this.fileTask.addFileListToInitialConversation(filesContents, conversationHistory);
 
         await this.conversationStorage.saveConversation(conversationHistory);
     }

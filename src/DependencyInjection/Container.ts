@@ -34,6 +34,7 @@ import ConversationHandler from '../Application/Task/ConversationHandler';
 import ActionHandler from '../Application/Task/ActionHandler';
 import PauseHandler from '../Application/Task/PauseHandler';
 import ExitHandler from '../Application/Task/ExitHandler';
+import ConversationService from '../Core/Conversation/UseCase/ConversationService';
 
 class GlobalContainer {
     private config: Config = new Config();
@@ -79,7 +80,18 @@ class GlobalContainer {
         this.audioRecorder,
         this.audioPlayer
     );
-    private fileActionUseCase: FileActionUseCase = new FileActionUseCase(this.fileSystemActionHandler);
+    private fileTask: FileTask = new FileTask(
+        this.conversationLogger
+    );
+    private conversationService: ConversationService = new ConversationService(
+        this.conversationStorage,
+        this.fileCollectorService,
+        this.fileTask
+    );
+    private fileActionUseCase: FileActionUseCase = new FileActionUseCase(
+        this.fileSystemActionHandler,
+        this.conversationService
+    );
     private directoryWatcher: FsDirectoryWatcher = new FsDirectoryWatcher(
         '.',
         this.config.includePatterns,
@@ -94,9 +106,6 @@ class GlobalContainer {
         this.stateStorage,
         this.systemPromptService,
         this.config
-    );
-    private fileTask: FileTask = new FileTask(
-        this.conversationLogger
     );
     private conversationUseCase: ConversationUseCase = new ConversationUseCase(
         this.conversationStorage,

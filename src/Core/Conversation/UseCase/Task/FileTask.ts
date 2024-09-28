@@ -32,6 +32,7 @@ ${content}
 \`\`\`
 `;
             messageItem.filePath = filePath;
+            console.log('File read:', filePath);
             conversationHistory.push(messageItem);
             await this.conversationLogger.logConversation(messageItem);
         }

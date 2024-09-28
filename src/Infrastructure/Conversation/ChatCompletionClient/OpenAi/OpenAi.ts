@@ -99,6 +99,14 @@ export default class OpenAi implements ChatClient {
                     required: ['filePath']
                 }
             }
+        },
+        {
+            type: 'function',
+            function: {
+                name: 'readAllFiles',
+                description: 'Reads all project files and adding them as system messages to conversation.' +
+                    'You MUST call readAllFiles when user first time rely on files. Call this only once in conversation'
+            }
         }
     ];
 

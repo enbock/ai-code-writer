@@ -24,7 +24,6 @@ export default class FileCollector implements FileCollectorService {
             if (excludedByPart) continue;
 
             const fileContent: string = await this.readFileStream(filePath);
-            console.log('<<< ', relativeFilePath);
 
             collectedFiles.push({filePath: relativeFilePath, content: fileContent});
         }
