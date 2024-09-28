@@ -28,11 +28,12 @@ export default class StartController {
     }
 
     public async start(): Promise<void> {
-        await this.gptConversationUseCase.initialize();
-        this.directoryWatcher.startWatching();
         await this.audioUseCase.measureNoiseLevel();
+        await this.gptConversationUseCase.initialize();
         await this.introduceWithAi();
-        await this.listenToUserInput();
+        await this.gptConversationUseCase.addProjectFiles();
+        this.directoryWatcher.startWatching();
+        await this.main();
     }
 
     private async introduceWithAi(): Promise<void> {
@@ -44,7 +45,7 @@ export default class StartController {
         await this.completeConversation();
     }
 
-    private async listenToUserInput(): Promise<void> {
+    private async main(): Promise<void> {
         // noinspection InfiniteLoopJS
         while (true) {
             const pauseState: PauseResponse = this.getPauseState();

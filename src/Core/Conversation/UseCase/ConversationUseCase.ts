@@ -28,19 +28,48 @@ export default class ConversationUseCase {
         systemPrompt.role = 'system';
         systemPrompt.content = this.systemPromptService.getSystemPrompt();
         conversationHistory.push(systemPrompt);
-        await this.conversationLogger.logConversation(systemPrompt);
-        const filesContent: Array<FileData> = await this.fileCollectorService.collectFiles();
+        // await this.conversationLogger.logConversation(systemPrompt);
+        
+        await this.conversationStorage.saveConversation(conversationHistory);
+    }
 
+    public async addProjectFiles(): Promise<void> {
+        const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
+        const filesContents: Array<FileData> = await this.fileCollectorService.collectFiles();
+
+        await this.addFileContentsToInitialConversation(filesContents, conversationHistory);
+        // this.addFileListToInitialConversation(filesContents, conversationHistory);
+
+        await this.conversationStorage.saveConversation(conversationHistory);
+    }
+
+    private addFileListToInitialConversation(
+        filesContents: Array<FileData>,
+        conversationHistory: Array<ChatMessageEntity>
+    ): void {
+        const messageItem = new ChatMessageEntity();
+        messageItem.role = 'system';
+        messageItem.content = 'Existing files in den Project:\n* ' +
+            filesContents.map(f => f.filePath).join('\n* ');
+        conversationHistory.push(messageItem);
+    }
+
+    private async addFileContentsToInitialConversation(
+        filesContent: Array<FileData>,
+        conversationHistory: Array<ChatMessageEntity>
+    ): Promise<void> {
         for (const {filePath, content} of filesContent) {
             const messageItem = new ChatMessageEntity();
             messageItem.role = 'system';
-            messageItem.content = 'Changed file ' + filePath + ':\n```\n' + content + '\n```';
+            messageItem.content = `Changed file ${filePath}:
+\`\`\`
+${content}
+\`\`\`
+`;
             messageItem.filePath = filePath;
             conversationHistory.push(messageItem);
             await this.conversationLogger.logConversation(messageItem);
         }
-
-        await this.conversationStorage.saveConversation(conversationHistory);
     }
 
     public async addUserMessageToConversation(request: ConversationRequest): Promise<void> {
