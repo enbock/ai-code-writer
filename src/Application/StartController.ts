@@ -4,7 +4,7 @@ import ConversationUseCase from '../Core/Conversation/UseCase/ConversationUseCas
 import ConversationRequest from './ConversationRequest';
 import DirectoryWatcher from '../Core/FileActions/DirectoryWatcher';
 import AddToConversationHistoryRequest from './AddToConversationHistoryRequest';
-import PauseResponse from './Response/PauseResponse';
+import StateResponse from './Response/StateResponse';
 import ActionType from '../Core/FileActions/ActionType';
 import ConversationHandler from './Task/ConversationHandler';
 import ExitHandler from './Task/ExitHandler';
@@ -48,7 +48,7 @@ export default class StartController {
     private async main(): Promise<void> {
         // noinspection InfiniteLoopJS
         while (true) {
-            const pauseState: PauseResponse = this.pauseHandler.getPauseState();
+            const pauseState: StateResponse = this.pauseHandler.getPauseState();
 
             if (pauseState.isPaused) {
                 await new Promise<void>(resolve => setTimeout(resolve, 1000));

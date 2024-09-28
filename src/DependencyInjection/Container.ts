@@ -141,7 +141,8 @@ class GlobalContainer {
     private conversationHandler: ConversationHandler = new ConversationHandler(
         this.audioUseCase,
         this.conversationUseCase,
-        this.actionHandler
+        this.actionHandler,
+        this.modeUseCase
     );
     public startController: StartController = new StartController(
         this.audioUseCase,

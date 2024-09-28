@@ -4,13 +4,15 @@ import ConversationResponse from '../ConversationResponse';
 import AudioUseCase from '../../Core/Audio/AudioUseCase';
 import ConversationUseCase from '../../Core/Conversation/UseCase/ConversationUseCase';
 import ActionHandler from './ActionHandler';
+import StateResponse from '../Response/StateResponse';
+import ModeUseCase from '../../Core/Conversation/ModeUseCase/ModeUseCase';
 
 export default class ConversationHandler {
-
     constructor(
         private audioUseCase: AudioUseCase,
         private gptConversationUseCase: ConversationUseCase,
-        private actionHandler: ActionHandler
+        private actionHandler: ActionHandler,
+        private modeUseCase: ModeUseCase
     ) {
     }
 
@@ -37,7 +39,10 @@ export default class ConversationHandler {
     }
 
     private async playAnswer(content: string): Promise<void> {
-        if (content == '') return;
+        const pauseState: StateResponse = new StateResponse();
+        this.modeUseCase.getState(pauseState);
+        if (pauseState.isSuspended || content == '') return;
+
         const answerAudio: Buffer = await this.audioUseCase.transformTextToAudio(content);
         await this.audioUseCase.playAudio(answerAudio);
     }

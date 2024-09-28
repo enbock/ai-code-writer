@@ -69,7 +69,16 @@ export default class ConversationUseCase {
         messageItem.role = request.role;
         messageItem.content = request.content;
         messageItem.filePath = request.fileName;
-        conversationHistory.push(messageItem);
+
+        const indexOfRelatedMessage: number = conversationHistory.findIndex(
+            m => m.toolCalls.findIndex(
+                tc => tc.id == request.callId
+            ) !== -1
+        );
+        if (indexOfRelatedMessage == -1 || indexOfRelatedMessage + 1 >= conversationHistory.length)
+            conversationHistory.push(messageItem);
+        else
+            conversationHistory.splice(indexOfRelatedMessage + 1, 0, messageItem);
 
         await this.conversationLogger.logConversation(messageItem);
         await this.conversationStorage.saveConversation(conversationHistory);

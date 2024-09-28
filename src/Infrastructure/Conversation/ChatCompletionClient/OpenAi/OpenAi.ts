@@ -104,8 +104,7 @@ export default class OpenAi implements ChatClient {
             type: 'function',
             function: {
                 name: 'readAllFiles',
-                description: 'Reads all project files and adding them as system messages to conversation.' +
-                    'You MUST call readAllFiles when user first time rely on files. Call this only once in conversation'
+                description: 'Reads all project files and adding them as system messages to conversation.'
             }
         }
     ];
@@ -115,7 +114,7 @@ export default class OpenAi implements ChatClient {
             type: 'function',
             function: {
                 name: 'pauseCommand',
-                description: 'Pauses the audio input.'
+                description: 'Disabled the audio input. NEVER call that on begin of the conversation'
             }
         },
         {

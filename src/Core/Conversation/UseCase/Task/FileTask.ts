@@ -26,7 +26,7 @@ export default class FileTask {
         for (const {filePath, content} of filesContent) {
             const messageItem = new ChatMessageEntity();
             messageItem.role = 'system';
-            messageItem.content = `Changed file ${filePath}:
+            messageItem.content = `File content of ${filePath}:
 \`\`\`
 ${content}
 \`\`\`
