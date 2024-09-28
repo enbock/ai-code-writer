@@ -31,7 +31,7 @@ In addition to the mandatory `OPENAI_API_KEY`, the application supports several 
 - **EXCLUDE_FILES**: Files to exclude from processing (default: `package-lock.json,.?*`).
 - **DEBUG_TO_FILE**: If set to `true`, logs the conversation to a file (default: `false`).
 - **OPENAI_CHAT_MODEL**: The model to be used for chat completions (default: `gpt-4o-2024-08-06`).
-- **MAGIC_WORD**: Reacts only on if user contains it in his input (default: `computer`).
+- **MAX_TOKENS**: Limitation of output tokens (default: `16383`).
 
 ## Prerequisites
 
