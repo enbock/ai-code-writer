@@ -47,7 +47,7 @@ export default class ConversationUseCase {
         const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
 
         const userRequestMessage: ChatMessageEntity = new ChatMessageEntity();
-        userRequestMessage.role = 'user';
+        userRequestMessage.role = request.role;
         userRequestMessage.content = request.transcription;
         conversationHistory.push(userRequestMessage);
 

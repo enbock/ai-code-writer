@@ -31,8 +31,20 @@ export default class StartController {
         await this.gptConversationUseCase.initialize();
         this.directoryWatcher.startWatching();
         await this.audioUseCase.measureNoiseLevel();
-        await this.introduction();
+        await this.introduceWithAi();
+        await this.listenToUserInput();
+    }
 
+    private async introduceWithAi(): Promise<void> {
+        const introductionRequest: ConversationRequest = new ConversationRequest();
+        introductionRequest.role = 'system';
+        introductionRequest.transcription = 'Bitte begrüße den Benutzer.';
+
+        await this.gptConversationUseCase.addUserMessageToConversation(introductionRequest);
+        await this.completeConversation();
+    }
+
+    private async listenToUserInput(): Promise<void> {
         // noinspection InfiniteLoopJS
         while (true) {
             const pauseState: PauseResponse = this.getPauseState();
@@ -59,20 +71,16 @@ export default class StartController {
         return pauseState;
     }
 
-    private async introduction() {
-        const helloAudio: Buffer = await this.audioUseCase.transformTextToAudio('Der K.I. Code Writer ist bereit.');
-        console.log('Der KI Code Writer ist bereit.');
-        const audioPromise: Promise<void> = this.audioUseCase.playAudio(helloAudio);
-        console.log('Sie können das Programm mit Strg+C oder "e" beenden und mit "p" pausieren.');
-        await audioPromise;
-    }
-
     private async runConversation(response: AudioResponse): Promise<void> {
         const conversationRequest: ConversationRequest = new ConversationRequest();
         conversationRequest.transcription = response.transcription;
-        let conversationResponse: ConversationResponse;
         console.log('Starte KI Anfrage...');
         await this.gptConversationUseCase.addUserMessageToConversation(conversationRequest);
+        await this.completeConversation();
+    }
+
+    private async completeConversation(): Promise<void> {
+        let conversationResponse: ConversationResponse;
         do {
             conversationResponse = new ConversationResponse();
             await this.gptConversationUseCase.continueConversation(conversationResponse);
@@ -101,7 +109,11 @@ export default class StartController {
         const addToConversationHistoryRequest: AddToConversationHistoryRequest = new AddToConversationHistoryRequest();
         addToConversationHistoryRequest.fileName = filePath;
         addToConversationHistoryRequest.content = content
-            ? 'Changed file ' + filePath + ':\n```\n' + content + '\n```'
+            ? 'Changed file ' + filePath + `:
+\`\`\`
+${content}
+\`\`\`
+`
             : 'File ' + filePath + ' was deleted by user.';
         addToConversationHistoryRequest.role = 'system';
 

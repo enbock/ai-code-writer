@@ -14,7 +14,8 @@ class App {
             }
             await Container.startController.start();
         } catch (error) {
-            console.error('Error starting AI Code Writer:', error);
+            console.error('AI Code Writer runtime error:', error);
+            process.exit(1);
         }
     }
 }
