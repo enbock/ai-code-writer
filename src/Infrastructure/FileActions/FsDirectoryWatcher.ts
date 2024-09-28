@@ -1,7 +1,7 @@
 import DirectoryWatcher from '../../Core/FileActions/DirectoryWatcher';
 import * as fs from 'fs';
 import * as path from 'path';
-import ActionType from '../../Core/ActionType';
+import ActionType from '../../Core/FileActions/ActionType';
 
 export default class FsDirectoryWatcher implements DirectoryWatcher {
     private watchers: Array<fs.FSWatcher> = [];

@@ -1,21 +1,26 @@
 import ConversationRequest from './ConversationRequest';
 import ConversationResponse from './ConversationResponse';
-import ChatClient from '../ChatClient';
 import ConversationStorage from '../ConversationStorage';
 import ConversationLogger from '../ConversationLogger';
 import SystemPromptService from '../SystemPromptService';
 import FileCollectorService, {FileData} from '../FileCollectorService';
-import AddToConversationHistoryRequest from './AddToConversationHistoryRequest';
 import ChatMessageEntity from '../../ChatMessageEntity';
-import ChatResultEntity from './ChatResultEntity';
+import StateStorage from '../../StateStorage';
+import Config from '../../../DependencyInjection/Config';
+import ConversationRunner from './Task/ConversationRunner';
+import FileTask from './Task/FileTask';
+import AddToConversationHistoryRequest from './AddToConversationHistoryRequest';
 
 export default class ConversationUseCase {
     constructor(
-        private chatCompletionClient: ChatClient,
         private conversationStorage: ConversationStorage,
         private conversationLogger: ConversationLogger,
         private systemPromptService: SystemPromptService,
-        private fileCollectorService: FileCollectorService
+        private fileCollectorService: FileCollectorService,
+        private stateStorage: StateStorage,
+        private config: Config,
+        private conversationRunner: ConversationRunner,
+        private fileTask: FileTask
     ) {
     }
 
@@ -26,10 +31,10 @@ export default class ConversationUseCase {
 
         const systemPrompt: ChatMessageEntity = new ChatMessageEntity();
         systemPrompt.role = 'system';
-        systemPrompt.content = this.systemPromptService.getSystemPrompt();
+        systemPrompt.content = this.systemPromptService.getSystemPrompt(this.config.magicWord);
         conversationHistory.push(systemPrompt);
         // await this.conversationLogger.logConversation(systemPrompt);
-        
+
         await this.conversationStorage.saveConversation(conversationHistory);
     }
 
@@ -37,73 +42,29 @@ export default class ConversationUseCase {
         const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
         const filesContents: Array<FileData> = await this.fileCollectorService.collectFiles();
 
-        await this.addFileContentsToInitialConversation(filesContents, conversationHistory);
-        // this.addFileListToInitialConversation(filesContents, conversationHistory);
+        await this.fileTask.addFileContentsToInitialConversation(filesContents, conversationHistory);
+        // this.fileTask.addFileListToInitialConversation(filesContents, conversationHistory);
 
         await this.conversationStorage.saveConversation(conversationHistory);
-    }
-
-    private addFileListToInitialConversation(
-        filesContents: Array<FileData>,
-        conversationHistory: Array<ChatMessageEntity>
-    ): void {
-        const messageItem = new ChatMessageEntity();
-        messageItem.role = 'system';
-        messageItem.content = 'Existing files in den Project:\n* ' +
-            filesContents.map(f => f.filePath).join('\n* ');
-        conversationHistory.push(messageItem);
-    }
-
-    private async addFileContentsToInitialConversation(
-        filesContent: Array<FileData>,
-        conversationHistory: Array<ChatMessageEntity>
-    ): Promise<void> {
-        for (const {filePath, content} of filesContent) {
-            const messageItem = new ChatMessageEntity();
-            messageItem.role = 'system';
-            messageItem.content = `Changed file ${filePath}:
-\`\`\`
-${content}
-\`\`\`
-`;
-            messageItem.filePath = filePath;
-            conversationHistory.push(messageItem);
-            await this.conversationLogger.logConversation(messageItem);
-        }
     }
 
     public async addUserMessageToConversation(request: ConversationRequest): Promise<void> {
-        const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
-
-        const userRequestMessage: ChatMessageEntity = new ChatMessageEntity();
-        userRequestMessage.role = request.role;
-        userRequestMessage.content = request.transcription;
-        conversationHistory.push(userRequestMessage);
-
-        await this.conversationLogger.logConversation(userRequestMessage);
-        await this.conversationStorage.saveConversation(conversationHistory);
+        if (this.stateStorage.getSuspendMode()) {
+            this.conversationStorage.setSuspendTranscription(request.transcription);
+            return;
+        }
+        await this.addCommonUserMessage(request);
     }
 
     public async continueConversation(response: ConversationResponse): Promise<void> {
-        const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
-        const chatResult: ChatResultEntity = await this.chatCompletionClient.completePrompt(conversationHistory);
-        await this.conversationLogger.logConversation({chatResult: chatResult});
-
-        const assistantAnswerMessage: ChatMessageEntity = new ChatMessageEntity();
-        assistantAnswerMessage.role = 'assistant';
-        assistantAnswerMessage.content = chatResult.content;
-        assistantAnswerMessage.toolCalls = chatResult.toolCalls;
-        conversationHistory.push(assistantAnswerMessage);
-
-        await this.conversationStorage.saveConversation(conversationHistory);
-
-        response.result = chatResult;
-        response.conversationComplete = chatResult.conversationComplete;
+        await this.conversationRunner.continueConversation(response);
     }
 
     public async addToConversationHistory(request: AddToConversationHistoryRequest): Promise<void> {
+        if (this.stateStorage.getSuspendMode()) return;
+
         const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
-        this.removeOldFileFromHistory(conversationHistory, request.fileName);
+        this.fileTask.removeOldFileFromHistory(conversationHistory, request.fileName);
 
         const messageItem: ChatMessageEntity = new ChatMessageEntity();
         messageItem.callId = request.callId;
@@ -116,49 +77,33 @@ ${content}
         await this.conversationStorage.saveConversation(conversationHistory);
     }
 
-    private removeOldFileFromHistory(
-        conversationHistory: Array<ChatMessageEntity>,
-        filePath: string
-    ): void {
-        const existingMessageIndex: number = conversationHistory.findIndex(
-            message => message.filePath === filePath
-        );
-        if (existingMessageIndex == -1) return;
+    private async addCommonUserMessage(request: ConversationRequest): Promise<void> {
+        const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
 
-        const deletedMessage: ChatMessageEntity = conversationHistory.splice(
-                existingMessageIndex,
-                1
-            )[0]
-        ;
-        this.removeCallFromResultMessages(deletedMessage, conversationHistory);
-        this.removeCallFromMessagesToolCalls(deletedMessage, conversationHistory);
+        const userRequestMessage: ChatMessageEntity = new ChatMessageEntity();
+        userRequestMessage.role = request.role;
+        userRequestMessage.content = request.transcription;
+        conversationHistory.push(userRequestMessage);
 
+        await this.conversationLogger.logConversation(userRequestMessage);
+        await this.conversationStorage.saveConversation(conversationHistory);
     }
 
-    private removeCallFromResultMessages(
-        deletedMessage: ChatMessageEntity,
-        conversationHistory: Array<ChatMessageEntity>
-    ): void {
-        for (const deletedCall of deletedMessage.toolCalls) {
-            const callId: string = deletedCall.id;
-            const index: number = conversationHistory.findIndex(c => c.callId == callId);
+    public async wakeUpConversation(): Promise<void> {
+        const conversationHistory: Array<ChatMessageEntity> = await this.conversationStorage.loadConversation();
 
-            if (index == -1) continue;
+        const systemMessage: ChatMessageEntity = new ChatMessageEntity();
+        systemMessage.content = 'User waked you up.';
+        systemMessage.role = 'system';
+        conversationHistory.push(systemMessage);
+        await this.conversationLogger.logConversation(systemMessage);
 
-            conversationHistory.splice(index, 1);
-        }
-    }
+        const userMessage: ChatMessageEntity = new ChatMessageEntity();
+        userMessage.content = this.conversationStorage.getSuspendTranscription();
+        userMessage.role = 'user';
+        conversationHistory.push(userMessage);
+        await this.conversationLogger.logConversation(userMessage);
 
-    private removeCallFromMessagesToolCalls(
-        deletedMessage: ChatMessageEntity,
-        conversationHistory: Array<ChatMessageEntity>
-    ): void {
-        for (const message of conversationHistory) {
-            const index: number = message.toolCalls.findIndex(c => c.id == deletedMessage.callId);
-
-            if (index == -1) continue;
-
-            message.toolCalls.splice(index, 1);
-        }
+        await this.conversationStorage.saveConversation(conversationHistory);
     }
 }

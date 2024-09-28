@@ -9,10 +9,9 @@ import ChatResultEntity from '../../../../Core/Conversation/UseCase/ChatResultEn
 import ToolCallConverter from './ToolCallConverter';
 import MessageEncoder from './MessageEncoder';
 import {ChatCompletionCreateParams} from 'openai/resources';
-import ConversationLogger from '../../../../Core/Conversation/ConversationLogger';
 import ChatCompletionCreateParamsStreaming = ChatCompletionCreateParams.ChatCompletionCreateParamsStreaming;
 
-export default class OpenAiChat implements ChatClient {
+export default class OpenAi implements ChatClient {
     constructor(
         private openai: OpenAI,
         private temperature: number,
@@ -20,12 +19,11 @@ export default class OpenAiChat implements ChatClient {
         private model: string,
         private maxTokens: number,
         private toolCallConverter: ToolCallConverter,
-        private messageEncoder: MessageEncoder,
-        private conversationLogger: ConversationLogger
+        private messageEncoder: MessageEncoder
     ) {
     }
 
-    private tools: Array<ChatCompletionTool> = [
+    private fileToolDefinitions: Array<ChatCompletionTool> = [
         {
             type: 'function',
             function: {
@@ -104,7 +102,39 @@ export default class OpenAiChat implements ChatClient {
         }
     ];
 
-    public async completePrompt(messages: Array<ChatMessageEntity>): Promise<ChatResultEntity> {
+    private actionToolDefinitions: Array<ChatCompletionTool> = [
+        {
+            type: 'function',
+            function: {
+                name: 'pauseCommand',
+                description: 'Pauses the audio input.'
+            }
+        },
+        {
+            type: 'function',
+            function: {
+                name: 'suspendCommand',
+                description: 'Switch to a suspend mode. That MUST be called after ending a topic. ' +
+                    'You MUST tell that the user before calling this command.'
+            }
+        },
+        {
+            type: 'function',
+            function: {
+                name: 'resumeCommand',
+                description: 'Resumes from suspend mode to normal operation.'
+            }
+        },
+        {
+            type: 'function',
+            function: {
+                name: 'exitCommand',
+                description: 'Ending the programm.'
+            }
+        }
+    ];
+
+    public async runChat(messages: Array<ChatMessageEntity>): Promise<ChatResultEntity> {
         const result: ChatResultEntity = new ChatResultEntity();
         let inputTokens: number = 0;
         let outputTokens: number = 0;
@@ -122,12 +152,14 @@ export default class OpenAiChat implements ChatClient {
                 top_p: 1,
                 messages: formattedMessages,
                 parallel_tool_calls: true,
-                tools: this.tools,
+                tools: [
+                    ...this.fileToolDefinitions,
+                    ...this.actionToolDefinitions
+                ],
                 stream_options: {
                     include_usage: true
                 }
             };
-            // await this.conversationLogger.logConversation(body);
             const responseStream: Stream<ChatCompletionChunk> = await this.openai.chat.completions.create(body);
 
             let progress: number = 0;
@@ -135,7 +167,6 @@ export default class OpenAiChat implements ChatClient {
             let finishReason: 'stop' | 'length' | 'tool_calls' | 'content_filter' | 'function_call' | null = null;
 
             for await (const chunk of responseStream) {
-                // await this.conversationLogger.logConversation(chunk);
                 let delta: ChatCompletionChunk.Choice.Delta | undefined = chunk.choices[0]?.delta;
                 const content: string = delta?.content || '';
                 result.content += content;

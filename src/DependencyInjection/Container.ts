@@ -1,11 +1,9 @@
 import StartController from '../Application/StartController';
-import ConversationChatCompletionClientOpenAiChat
-    from '../Infrastructure/Conversation/ChatCompletionClient/OpenAi/OpenAiChat';
+import ChatClientOpenAi from '../Infrastructure/Conversation/ChatCompletionClient/OpenAi/OpenAi';
 import AudioTransformClientOpenAiAudio from '../Infrastructure/AudioTransformClient/OpenAi/OpenAiAudio';
 import NodeAudioRecorder from '../Infrastructure/AudioRecorder/Node/Node';
 import NodeAudioPlayer from '../Infrastructure/AudioPlayer/Node/Node';
-import InMemoryConversationStorage
-    from '../Infrastructure/Conversation/ConversationStorage/InMemoryConversationStorage';
+import ConversationStorageInMemory from '../Infrastructure/Conversation/ConversationStorage/InMemory';
 import SystemPromptServiceDefinedSystemPrompt from '../Infrastructure/Conversation/SystemPrompt/DefinedSystemPrompt';
 import NoopConversationLogger from '../Infrastructure/Conversation/ConversationLogger/NoopConversationLogger';
 import FileSystemActionHandler from '../Infrastructure/FileActions/FileSystemActionHandler';
@@ -22,12 +20,20 @@ import Config from './Config';
 import Logger from '../Infrastructure/Logger/Logger';
 import FileConversationLogger from '../Infrastructure/Conversation/ConversationLogger/FileConversationLogger';
 import ConversationLogger from '../Core/Conversation/ConversationLogger';
-import PauseUseCase from '../Core/Conversation/PauseUseCase/PauseUseCase';
+import ModeUseCase from '../Core/Conversation/ModeUseCase/ModeUseCase';
 import StateStorageMemory from '../Infrastructure/StateStorage/Memory/Memory';
 import StateStorage from '../Core/StateStorage';
 import FileActionExecutor from '../Application/Task/FileActionExecutor';
 import ToolCallConverter from '../Infrastructure/Conversation/ChatCompletionClient/OpenAi/ToolCallConverter';
 import MessageEncoder from '../Infrastructure/Conversation/ChatCompletionClient/OpenAi/MessageEncoder';
+import ConversationStorage from '../Core/Conversation/ConversationStorage';
+import ConversationRunner from '../Core/Conversation/UseCase/Task/ConversationRunner';
+import FileTask from '../Core/Conversation/UseCase/Task/FileTask';
+import ChatClient from '../Core/Conversation/ChatClient';
+import ConversationHandler from '../Application/Task/ConversationHandler';
+import ActionHandler from '../Application/Task/ActionHandler';
+import PauseHandler from '../Application/Task/PauseHandler';
+import ExitHandler from '../Application/Task/ExitHandler';
 
 class GlobalContainer {
     private config: Config = new Config();
@@ -36,7 +42,7 @@ class GlobalContainer {
         apiKey: this.config.apiKey
     });
 
-    private conversationStorage: InMemoryConversationStorage = new InMemoryConversationStorage();
+    private conversationStorage: ConversationStorage = new ConversationStorageInMemory();
     private systemPromptService: SystemPromptServiceDefinedSystemPrompt = new SystemPromptServiceDefinedSystemPrompt();
     private conversationLogger: ConversationLogger = this.config.logToFile ? new FileConversationLogger() : new NoopConversationLogger();
     private fileSystemActionHandler: FileSystemActionHandler = new FileSystemActionHandler(new Logger());
@@ -47,7 +53,7 @@ class GlobalContainer {
         this.config.excludeFiles
     );
     private logger: Logger = new Logger();
-    private conversationChatCompletionClientOpenAiChat: ConversationChatCompletionClientOpenAiChat = new ConversationChatCompletionClientOpenAiChat(
+    private chatClient: ChatClient = new ChatClientOpenAi(
         this.openAi,
         this.config.openAiChatTemperature,
         this.logger,
@@ -56,8 +62,7 @@ class GlobalContainer {
         new ToolCallConverter(
             this.logger
         ),
-        new MessageEncoder(),
-        this.conversationLogger
+        new MessageEncoder()
     );
     private audioTransformClientOpenAi: AudioTransformClientOpenAiAudio = new AudioTransformClientOpenAiAudio(
         'https://api.openai.com/v1/audio/speech',
@@ -81,27 +86,61 @@ class GlobalContainer {
         this.config.excludeDirs,
         this.config.excludeFiles
     );
+    private stateStorage: StateStorage = new StateStorageMemory();
+    private conversationRunner: ConversationRunner = new ConversationRunner(
+        this.chatClient,
+        this.conversationStorage,
+        this.conversationLogger,
+        this.stateStorage,
+        this.systemPromptService,
+        this.config
+    );
+    private fileTask: FileTask = new FileTask(
+        this.conversationLogger
+    );
     private conversationUseCase: ConversationUseCase = new ConversationUseCase(
-        this.conversationChatCompletionClientOpenAiChat,
         this.conversationStorage,
         this.conversationLogger,
         this.systemPromptService,
-        this.fileCollectorService
+        this.fileCollectorService,
+        this.stateStorage,
+        this.config,
+        this.conversationRunner,
+        this.fileTask
     );
-    private stateStorage: StateStorage = new StateStorageMemory();
-    private pauseUseCase: PauseUseCase = new PauseUseCase(
+    private modeUseCase: ModeUseCase = new ModeUseCase(
         this.stateStorage
     );
     private fileActionExecutor: FileActionExecutor = new FileActionExecutor(
         this.fileActionUseCase,
         this.conversationUseCase
     );
+    private pauseHandler: PauseHandler = new PauseHandler(
+        this.audioUseCase,
+        this.modeUseCase
+    );
+    private exitHandler: ExitHandler = new ExitHandler();
+    private actionHandler: ActionHandler = new ActionHandler(
+        this.directoryWatcher,
+        this.fileActionExecutor,
+        this.modeUseCase,
+        this.audioUseCase,
+        this.conversationUseCase,
+        this.pauseHandler,
+        this.exitHandler
+    );
+    private conversationHandler: ConversationHandler = new ConversationHandler(
+        this.audioUseCase,
+        this.conversationUseCase,
+        this.actionHandler
+    );
     public startController: StartController = new StartController(
         this.audioUseCase,
         this.conversationUseCase,
         this.directoryWatcher,
-        this.pauseUseCase,
-        this.fileActionExecutor
+        this.conversationHandler,
+        this.exitHandler,
+        this.pauseHandler
     );
 }
 

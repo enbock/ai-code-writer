@@ -1,5 +1,5 @@
-import FileActionEntity from '../FileActionEntity';
+import ActionEntity from '../ActionEntity';
 
 export default interface FileActionRequest {
-    action: FileActionEntity;
+    action: ActionEntity;
 }

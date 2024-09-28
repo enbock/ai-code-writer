@@ -1,7 +1,7 @@
 import SystemPromptService from '../../../Core/Conversation/SystemPromptService';
 
 export default class DefinedSystemPrompt implements SystemPromptService {
-    public getSystemPrompt(): string {
+    public getSystemPrompt(magicWord: string): string {
         return `
 You are a assistant and support the user.
 
@@ -16,6 +16,7 @@ Behavior Rules:
 * You output will be transform into audio, to keep your messages short and good speakable
 * Perform file actions independently as needed without waiting for explicit instructions.
 * Reduce the iterations to complete the user requested activities to an minimum
+* After completing a topic suspend yourself. You will be waked up by user with "${magicWord}".
 
 "Remembering" behaviors (maintaining a "memory-file"):
 * Manage './.ai-memory.dat' autonomously: Open and update the file automatically with important info without being prompted.
@@ -26,4 +27,16 @@ Behavior Rules:
 
 `;
     }
+
+    public getSuspendModePrompt(magicWord: string): string {
+        return `
+You are a assistant and support the user.
+
+Currently you are suspended. Call the tool "resumeCommand" if the user need you assistent.
+The user use the magic word "${magicWord}" to bring you back from suspending.
+
+NEVER answer the user.
+`;
+    }
+
 }

@@ -1,6 +1,6 @@
 import FileActionRequestInterface from '../Core/FileActions/FileActionRequest';
-import FileActionEntity from '../Core/FileActionEntity';
+import ActionEntity from '../Core/ActionEntity';
 
 export default class FileActionRequest implements FileActionRequestInterface {
-    public action: FileActionEntity = new FileActionEntity();
+    public action: ActionEntity = new ActionEntity();
 }

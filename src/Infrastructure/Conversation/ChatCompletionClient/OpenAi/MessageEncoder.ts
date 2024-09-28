@@ -2,12 +2,12 @@ import ChatMessageEntity from '../../../../Core/ChatMessageEntity';
 import {ChatCompletionMessageParam} from 'openai/src/resources/chat/completions';
 import {ChatCompletionToolMessageParam} from 'openai/src/resources/chat/completions';
 import {ChatCompletionAssistantMessageParam} from 'openai/src/resources/chat/completions';
-import FileActionEntity from '../../../../Core/FileActionEntity';
+import ActionEntity from '../../../../Core/ActionEntity';
 import OpenAI from 'openai';
 import ChatCompletionMessageToolCall = OpenAI.ChatCompletionMessageToolCall;
 
 export default class MessageEncoder {
-    private argumentConverter: Record<string, (call: FileActionEntity) => any> = {
+    private argumentConverter: Record<string, (call: ActionEntity) => any> = {
         readFile: this.convertFilePathArguments.bind(this),
         writeFile: this.convertPathAndContentArguments.bind(this),
         deleteFile: this.convertFilePathArguments.bind(this),
@@ -34,7 +34,7 @@ export default class MessageEncoder {
         return result;
     }
 
-    private convertToolCall(call: FileActionEntity): ChatCompletionMessageToolCall {
+    private convertToolCall(call: ActionEntity): ChatCompletionMessageToolCall {
         return {
             type: 'function',
             id: call.id,
@@ -47,20 +47,20 @@ export default class MessageEncoder {
         };
     }
 
-    private convertPathAndContentArguments(call: FileActionEntity): any {
+    private convertPathAndContentArguments(call: ActionEntity): any {
         return {
             filePath: call.filePath,
             content: call.content
         };
     }
 
-    private convertFilePathArguments(call: FileActionEntity): any {
+    private convertFilePathArguments(call: ActionEntity): any {
         return {
             filePath: call.filePath
         };
     }
 
-    private convertMoveArguments(call: FileActionEntity): any {
+    private convertMoveArguments(call: ActionEntity): any {
         return {
             sourcePath: call.filePath,
             destinationPath: call.targetFilePath

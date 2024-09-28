@@ -1,3 +1,5 @@
 export default interface SystemPromptService {
-    getSystemPrompt(): string;
+    getSystemPrompt(magicWord: string): string;
+
+    getSuspendModePrompt(magicWord: string): string;
 }

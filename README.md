@@ -32,6 +32,7 @@ In addition to the mandatory `OPENAI_API_KEY`, the application supports several 
 - **DEBUG_TO_FILE**: If set to `true`, logs the conversation to a file (default: `false`).
 - **OPENAI_CHAT_MODEL**: The model to be used for chat completions (default: `gpt-4o-2024-08-06`).
 - **MAX_TOKENS**: Limitation of output tokens (default: `16383`).
+- **MAGIC_WORD**: Word to wakeup from suspend mode (default: `computer`).
 
 ## Prerequisites
 
@@ -56,6 +57,7 @@ npx ai-code-writer
 2. **Interaction**:
     - After starting the application, a welcome message will be played: "The AI Code Writer is ready."
     - Speak your input into the microphone. The application will record your speech and convert it to text.
+    - You can control microphone suspending, input pause or exiting the programm just by telling it the AI.
 
 3. **Conversation**:
     - The transcribed input will be sent to the OpenAI API to get a response.

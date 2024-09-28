@@ -1,4 +1,4 @@
-import ActionType from '../ActionType';
+import ActionType from './ActionType';
 
 export default interface DirectoryWatcher {
     startWatching(): void;
@@ -11,4 +11,3 @@ export default interface DirectoryWatcher {
 
     onChange(callback: (action: ActionType, filePath: string, content: string) => void): void;
 }
-
