@@ -127,7 +127,7 @@ export default class OpenAiChat implements ChatClient {
                     include_usage: true
                 }
             };
-            await this.conversationLogger.logConversation(body);
+            // await this.conversationLogger.logConversation(body);
             const responseStream: Stream<ChatCompletionChunk> = await this.openai.chat.completions.create(body);
 
             let progress: number = 0;
@@ -135,7 +135,7 @@ export default class OpenAiChat implements ChatClient {
             let finishReason: 'stop' | 'length' | 'tool_calls' | 'content_filter' | 'function_call' | null = null;
 
             for await (const chunk of responseStream) {
-                await this.conversationLogger.logConversation(chunk);
+                // await this.conversationLogger.logConversation(chunk);
                 let delta: ChatCompletionChunk.Choice.Delta | undefined = chunk.choices[0]?.delta;
                 const content: string = delta?.content || '';
                 result.content += content;
